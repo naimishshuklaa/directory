@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>OmniSync Personal Directory</title>
 
-  <!-- PWA & Mobile Meta Tags -->
+  <!-- PWA & Mobile Web Meta -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#0284c7" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -14,14 +14,14 @@
   <meta name="apple-mobile-web-app-title" content="OmniSync" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230284c7'%3E%3Cpath d='M12 2L2 12L12 22L22 12L12 2Z'/%3E%3C/svg%3E" />
 
-  <!-- Firebase SDKs (Compat versions for single-file deployment) -->
+  <!-- Firebase SDKs (Compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome 6 for Icons -->
+  <!-- FontAwesome 6 Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
   <script>
@@ -69,16 +69,14 @@
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex justify-center selection:bg-sky-500 selection:text-white">
 
-  <!-- ========================================== -->
-  <!-- AUTH LOCK SCREEN (Private Access Guard)    -->
-  <!-- ========================================== -->
+  <!-- AUTH LOCK SCREEN (Private Access Guard) -->
   <div id="auth-lock-screen" class="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-md flex flex-col items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-2xl max-w-sm w-full text-center border border-slate-200">
       <div class="w-16 h-16 bg-gradient-to-tr from-sky-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl mx-auto mb-4 shadow-lg shadow-sky-500/30">
         <i class="fa-solid fa-lock"></i>
       </div>
       <h2 class="text-xl font-bold text-slate-900 mb-1">OmniSync Directory</h2>
-      <p class="text-xs text-slate-500 mb-5">Single-user protected access. Sign in with your authorized Google account to sync live across devices.</p>
+      <p class="text-xs text-slate-500 mb-5">Single-user protected directory. Sign in with your Google account to sync live across devices.</p>
       
       <button onclick="loginWithGoogle()" class="w-full flex items-center justify-center space-x-2.5 py-3 px-4 bg-sky-600 hover:bg-sky-700 active:scale-95 text-white rounded-xl font-semibold text-sm transition shadow-md shadow-sky-500/20">
         <i class="fa-brands fa-google text-base"></i>
@@ -91,7 +89,7 @@
           <input type="email" id="inputCustomAllowedEmail" placeholder="your-email@gmail.com" class="flex-1 text-xs border border-slate-300 rounded-lg p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none" />
           <button onclick="saveAllowedEmail()" class="px-2.5 py-2 bg-slate-800 text-white text-xs font-semibold rounded-lg hover:bg-slate-900 transition">Save</button>
         </div>
-        <p class="text-[10px] text-slate-400 mt-1">Set your email once or change it whenever required.</p>
+        <p class="text-[10px] text-slate-400 mt-1">Leaves empty to auto-authorize your first login.</p>
       </div>
       
       <p id="auth-error" class="text-rose-600 text-xs font-medium mt-3 hidden bg-rose-50 p-2 rounded-lg border border-rose-200"></p>
@@ -113,7 +111,6 @@
         <div id="headerTime" class="text-xs sm:text-sm font-mono font-bold tracking-wider text-slate-900 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
           00:00:00 AM
         </div>
-        <!-- Sync & Profile Modal Trigger -->
         <button onclick="openModal('modalSyncBackup')" class="p-1.5 text-slate-500 hover:text-sky-600 rounded-lg hover:bg-slate-100 text-sm transition" title="Sync / Profile / Settings">
           <i class="fa-solid fa-arrows-rotate"></i>
         </button>
@@ -163,7 +160,7 @@
             <input 
               type="text" 
               id="directoryOmniSearchInput" 
-              placeholder="Search anything: names, phone, email, pdfs, media..." 
+              placeholder="Search anything: names, phone, email, pdfs, media, labels..." 
               class="w-full pl-10 pr-9 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition shadow-2xs"
             />
             <button id="clearSearchBtn" onclick="clearOmniSearch()" class="hidden absolute right-3 top-3 text-slate-400 hover:text-slate-600 text-sm">
@@ -259,10 +256,10 @@
               <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center">
                 <i class="fa-solid fa-list-check mr-1.5 text-sky-600"></i> Details & Media Points
               </h3>
-              <p class="text-[10px] text-slate-400 mt-0.5">Phone, email, docs, images, videos & notes</p>
+              <p class="text-[10px] text-slate-400 mt-0.5">Text points, phone, email, media & docs</p>
             </div>
-            <button id="btnOpenAddDetailModal" class="inline-flex items-center text-xs font-medium bg-slate-900 text-white px-3 py-1.5 rounded-xl hover:bg-slate-800 transition shadow-xs">
-              <i class="fa-solid fa-plus mr-1"></i> Add Point
+            <button id="btnOpenAddDetailModal" class="inline-flex items-center text-xs font-semibold bg-sky-600 text-white px-3.5 py-2 rounded-xl hover:bg-sky-700 transition shadow-xs">
+              <i class="fa-solid fa-plus mr-1.5"></i> Add Point
             </button>
           </div>
           <div id="detailPointsContainer" class="space-y-3"></div>
@@ -368,13 +365,15 @@
 
     </nav>
 
-    <!-- MODAL 1: CREATE OR EDIT ITEM -->
+    <!-- ========================================================= -->
+    <!-- MODAL 1: CREATE OR EDIT STRUCTURED ITEM (With Quick Points)-->
+    <!-- ========================================================= -->
     <div id="modalItem" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
-      <div class="bg-white rounded-3xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+      <div class="bg-white rounded-3xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
         <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
           <div>
             <h3 id="modalItemHeaderTitle" class="text-base sm:text-lg font-bold text-slate-900">Create New Item</h3>
-            <p class="text-xs text-slate-500">Define the item, description, and connected items</p>
+            <p class="text-xs text-slate-500">Define the title, description, quick categories & mutual connections</p>
           </div>
           <button onclick="closeModal('modalItem')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 text-sm">
             <i class="fa-solid fa-xmark"></i>
@@ -392,6 +391,43 @@
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">General Description</label>
             <textarea id="inputItemDesc" rows="2" placeholder="Summary or overview of this item..." class="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none"></textarea>
+          </div>
+
+          <!-- QUICK CATEGORY BUILDER IN CREATE MODAL -->
+          <div class="border border-sky-100 rounded-2xl p-3.5 bg-sky-50/50">
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-xs font-bold uppercase tracking-wider text-sky-900">
+                <i class="fa-solid fa-bolt text-amber-500 mr-1"></i> Quick Add Details (Presets)
+              </label>
+              <span class="text-[10px] text-sky-700 bg-sky-100/80 px-2 py-0.5 rounded-md font-semibold">Ready to Fill</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mb-3">Quickly add phone, email, photo, video, audio or docs right away:</p>
+            
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 mb-3">
+              <button type="button" onclick="presetModalAddPoint('phone')" class="p-2 rounded-xl bg-white border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 text-slate-700 flex flex-col items-center text-[10px] font-bold transition">
+                <i class="fa-solid fa-phone text-emerald-600 mb-1 text-xs"></i> Phone
+              </button>
+              <button type="button" onclick="presetModalAddPoint('email')" class="p-2 rounded-xl bg-white border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-slate-700 flex flex-col items-center text-[10px] font-bold transition">
+                <i class="fa-solid fa-envelope text-blue-600 mb-1 text-xs"></i> Email
+              </button>
+              <button type="button" onclick="presetModalAddPoint('image')" class="p-2 rounded-xl bg-white border border-slate-200 hover:border-amber-500 hover:bg-amber-50 text-slate-700 flex flex-col items-center text-[10px] font-bold transition">
+                <i class="fa-solid fa-image text-amber-600 mb-1 text-xs"></i> Image
+              </button>
+              <button type="button" onclick="presetModalAddPoint('video')" class="p-2 rounded-xl bg-white border border-slate-200 hover:border-purple-500 hover:bg-purple-50 text-slate-700 flex flex-col items-center text-[10px] font-bold transition">
+                <i class="fa-solid fa-video text-purple-600 mb-1 text-xs"></i> Video
+              </button>
+              <button type="button" onclick="presetModalAddPoint('voice')" class="p-2 rounded-xl bg-white border border-slate-200 hover:border-teal-500 hover:bg-teal-50 text-slate-700 flex flex-col items-center text-[10px] font-bold transition">
+                <i class="fa-solid fa-microphone text-teal-600 mb-1 text-xs"></i> Voice
+              </button>
+              <button type="button" onclick="presetModalAddPoint('pdf')" class="p-2 rounded-xl bg-white border border-slate-200 hover:border-rose-500 hover:bg-rose-50 text-slate-700 flex flex-col items-center text-[10px] font-bold transition">
+                <i class="fa-solid fa-file-pdf text-rose-600 mb-1 text-xs"></i> PDF/Doc
+              </button>
+            </div>
+
+            <!-- Staged Quick Points Container -->
+            <div id="modalStagedPointsList" class="space-y-2">
+              <!-- Rendered via JS -->
+            </div>
           </div>
 
           <!-- CONNECTED ITEMS WITH ON-THE-FLY CREATION -->
@@ -438,13 +474,15 @@
       </div>
     </div>
 
-    <!-- MODAL 2: ADD CATEGORIZED DETAIL POINT -->
+    <!-- ========================================================= -->
+    <!-- MODAL 2: REDESIGNED RICH DETAIL POINT & MEDIA CREATOR     -->
+    <!-- ========================================================= -->
     <div id="modalDetailPoint" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
-      <div class="bg-white rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+      <div class="bg-white rounded-3xl w-full max-w-md max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
         <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
           <div>
             <h3 class="text-base font-bold text-slate-900">Add Detail Point</h3>
-            <p class="text-xs text-slate-500">Pick a category and media/input type</p>
+            <p class="text-xs text-slate-500">Add searchable text, contact number, or any media</p>
           </div>
           <button onclick="closeModal('modalDetailPoint')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 text-sm">
             <i class="fa-solid fa-xmark"></i>
@@ -452,50 +490,104 @@
         </div>
 
         <div class="p-5 overflow-y-auto space-y-4">
+          <!-- 1. SEARCHABLE LABEL / CATEGORY -->
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Category Label</label>
-            <div class="flex space-x-2">
-              <input type="text" id="inputDetailCategory" placeholder="e.g., Contact, Specs, Billing, Site Inspection" class="flex-1 px-3 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none" />
-              <select id="quickCategorySelect" onchange="applyQuickCategory(this.value)" class="text-xs border border-slate-200 rounded-xl px-2 bg-slate-50">
-                <option value="">Presets</option>
-                <option value="Phone Number">Phone Number</option>
-                <option value="Official Email">Official Email</option>
-                <option value="PDF Document">PDF Document</option>
-                <option value="Site Photo">Site Photo</option>
-                <option value="Video Tour">Video Tour</option>
-                <option value="Voice Memo">Voice Memo</option>
-                <option value="Reference Note">Reference Note</option>
-              </select>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+              Searchable Label / Category *
+            </label>
+            <div class="relative">
+              <input 
+                type="text" 
+                id="inputDetailCategory" 
+                placeholder="e.g., Office Mobile, Meeting Notes, Project Spec" 
+                class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none" 
+              />
+            </div>
+            
+            <!-- Quick preset pill tags -->
+            <div class="flex items-center space-x-1 overflow-x-auto pt-2 no-scrollbar text-[11px]">
+              <span class="text-slate-400 font-medium text-[10px] shrink-0 mr-1">Presets:</span>
+              <button type="button" onclick="applyPresetLabel('Direct Phone', 'phone')" class="px-2.5 py-0.5 rounded-full bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-800 shrink-0 border border-slate-200">Phone</button>
+              <button type="button" onclick="applyPresetLabel('Official Email', 'email')" class="px-2.5 py-0.5 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-800 shrink-0 border border-slate-200">Email</button>
+              <button type="button" onclick="applyPresetLabel('Site Photo', 'image')" class="px-2.5 py-0.5 rounded-full bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-800 shrink-0 border border-slate-200">Photo</button>
+              <button type="button" onclick="applyPresetLabel('Video Tour', 'video')" class="px-2.5 py-0.5 rounded-full bg-slate-100 hover:bg-purple-100 text-slate-700 hover:text-purple-800 shrink-0 border border-slate-200">Video</button>
+              <button type="button" onclick="applyPresetLabel('Voice Memo', 'voice')" class="px-2.5 py-0.5 rounded-full bg-slate-100 hover:bg-teal-100 text-slate-700 hover:text-teal-800 shrink-0 border border-slate-200">Voice</button>
+              <button type="button" onclick="applyPresetLabel('PDF Spec', 'pdf')" class="px-2.5 py-0.5 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-700 hover:text-rose-800 shrink-0 border border-slate-200">PDF</button>
             </div>
           </div>
 
+          <!-- 2. TYPE SELECTOR -->
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Input Type</label>
-            <select id="inputDetailType" onchange="handleDetailTypeChange(this.value)" class="w-full px-3 py-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none bg-white">
-              <option value="text">Plain Text / Note</option>
-              <option value="phone">Phone Number (Direct Actionable)</option>
-              <option value="email">Email Address (Direct Actionable)</option>
-              <option value="image">Image (URL or Local File)</option>
-              <option value="video">Video (URL or MP4/WebM)</option>
-              <option value="pdf">PDF / Document File</option>
-              <option value="voice">Audio / Voice Note</option>
-            </select>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Point Type</label>
+            <div class="grid grid-cols-4 gap-1.5 text-xs">
+              <button type="button" onclick="switchPointType('text')" id="btnType_text" class="type-picker-btn py-2 px-1 text-center rounded-xl border border-sky-500 bg-sky-50 text-sky-700 font-bold flex flex-col items-center">
+                <i class="fa-solid fa-align-left mb-1 text-sm"></i> Text Note
+              </button>
+              <button type="button" onclick="switchPointType('phone')" id="btnType_phone" class="type-picker-btn py-2 px-1 text-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-semibold flex flex-col items-center hover:bg-slate-100">
+                <i class="fa-solid fa-phone mb-1 text-sm text-emerald-600"></i> Phone
+              </button>
+              <button type="button" onclick="switchPointType('email')" id="btnType_email" class="type-picker-btn py-2 px-1 text-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-semibold flex flex-col items-center hover:bg-slate-100">
+                <i class="fa-solid fa-envelope mb-1 text-sm text-blue-600"></i> Email
+              </button>
+              <button type="button" onclick="switchPointType('media')" id="btnType_media" class="type-picker-btn py-2 px-1 text-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-semibold flex flex-col items-center hover:bg-slate-100">
+                <i class="fa-solid fa-photo-film mb-1 text-sm text-amber-600"></i> Media/File
+              </button>
+            </div>
           </div>
 
-          <div id="detailValueContainer">
-            <label id="detailValueLabel" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Detail Content / Value</label>
-            <textarea id="inputDetailValue" rows="2" placeholder="Enter content, number, or URL..." class="w-full px-3 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none"></textarea>
+          <!-- 3. MAIN CONTENT / VALUE INPUT -->
+          <div>
+            <label id="detailValueLabel" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+              Point Content / Value *
+            </label>
+            <textarea 
+              id="inputDetailValue" 
+              rows="3" 
+              placeholder="Enter your notes, description, or paste a link/number..." 
+              class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none"
+            ></textarea>
           </div>
 
-          <div id="detailFileHelper" class="hidden border border-dashed border-slate-300 p-2.5 rounded-xl bg-slate-50 text-center">
-            <input type="file" id="detailFileInput" onchange="processDetailFileUpload(event)" class="text-xs file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:bg-sky-100 file:text-sky-700" />
-            <p class="text-[10px] text-slate-400 mt-1">Files are securely encoded for live cloud syncing</p>
+          <!-- 4. ATTACH ANY MEDIA (Images, Videos, PDFs, Audio) -->
+          <div class="border border-slate-200 rounded-2xl p-3.5 bg-slate-50">
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                <i class="fa-solid fa-paperclip text-slate-500 mr-1"></i> Attach Media or Document
+              </label>
+              <span class="text-[10px] text-slate-400">All media formats</span>
+            </div>
+
+            <input 
+              type="file" 
+              id="detailFileInput" 
+              onchange="processUniversalFileUpload(event)" 
+              class="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-sky-600 file:text-white hover:file:bg-sky-700 cursor-pointer" 
+            />
+
+            <!-- Preview Card for Attached File -->
+            <div id="mediaUploadPreviewContainer" class="hidden mt-3 p-2.5 bg-white border border-slate-200 rounded-xl flex items-center justify-between">
+              <div class="flex items-center space-x-2.5 min-w-0">
+                <div id="mediaPreviewIcon" class="w-9 h-9 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-sm shrink-0 border border-sky-100">
+                  <i class="fa-solid fa-file"></i>
+                </div>
+                <div class="min-w-0">
+                  <p id="mediaPreviewFileName" class="text-xs font-bold text-slate-800 truncate">file.pdf</p>
+                  <span id="mediaPreviewFileType" class="text-[10px] text-slate-400 uppercase">PDF</span>
+                </div>
+              </div>
+              <button type="button" onclick="clearStagedUpload()" class="p-1 text-slate-400 hover:text-rose-500 text-xs">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
           </div>
         </div>
 
         <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end space-x-2">
-          <button onclick="closeModal('modalDetailPoint')" class="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-xl">Cancel</button>
-          <button onclick="saveDetailPoint()" class="px-5 py-2 text-xs sm:text-sm font-semibold bg-sky-600 text-white rounded-xl hover:bg-sky-700 transition shadow-xs">Add Point</button>
+          <button onclick="closeModal('modalDetailPoint')" class="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-xl transition">Cancel</button>
+          <button onclick="saveDetailPoint()" class="px-5 py-2 text-xs sm:text-sm font-semibold bg-sky-600 text-white rounded-xl hover:bg-sky-700 transition shadow-xs flex items-center space-x-1.5">
+            <i class="fa-solid fa-check text-xs"></i>
+            <span>Add Point</span>
+          </button>
         </div>
       </div>
     </div>
@@ -575,7 +667,7 @@
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Attach to an Existing Item</label>
               <select id="convertSelectTargetItem" class="w-full text-xs p-2.5 border border-slate-200 rounded-xl bg-white mb-2"></select>
-              <input type="text" id="convertCategoryName" placeholder="Category tag (e.g. Media, Inspection)" class="w-full text-xs p-2 border border-slate-200 rounded-xl mb-2" />
+              <input type="text" id="convertCategoryName" placeholder="Searchable label / category" class="w-full text-xs p-2 border border-slate-200 rounded-xl mb-2" />
               <button onclick="attachInboxToExistingItem()" class="w-full py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-xl transition">
                 Attach as Detail Point
               </button>
@@ -599,7 +691,6 @@
         </div>
 
         <div class="p-5 space-y-4">
-          <!-- Active User Card -->
           <div class="bg-sky-50 border border-sky-100 p-3.5 rounded-2xl flex items-center justify-between">
             <div class="flex items-center space-x-3">
               <div class="w-10 h-10 rounded-full bg-sky-600 text-white flex items-center justify-center font-bold text-sm">
@@ -617,10 +708,9 @@
             </button>
           </div>
 
-          <!-- JSON Export/Import Backup -->
           <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
             <h4 class="text-xs font-bold text-slate-800 uppercase mb-1">Local JSON File Backup</h4>
-            <p class="text-[11px] text-slate-500 mb-2.5">Manual snapshot backup of all items and links.</p>
+            <p class="text-[11px] text-slate-500 mb-2.5">Snapshot backup of all items, searchable labels, and links.</p>
             <div class="grid grid-cols-2 gap-2">
               <button onclick="exportDatabaseJSON()" class="py-2 px-3 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1">
                 <i class="fa-solid fa-download"></i>
@@ -639,11 +729,9 @@
 
   </div>
 
-  <!-- ========================================================= -->
-  <!-- JAVASCRIPT LOGIC & FIREBASE REAL-TIME ENGINE              -->
-  <!-- ========================================================= -->
+  <!-- JAVASCRIPT CORE ENGINE -->
   <script>
-    // 1. Firebase Configuration Credentials
+    // 1. Firebase Credentials
     const firebaseConfig = {
       apiKey: "AIzaSyBVLAvU_kONaEIN9EBLFcayn1ykOxQYWEk",
       authDomain: "my-omni-app-2e0c9.firebaseapp.com",
@@ -654,43 +742,36 @@
       appId: "1:862817215160:web:aa9c6265369a97dfd44a4d"
     };
 
-    // 2. Initialize Firebase FIRST before calling auth or firestore
+    // 2. Initialize Firebase FIRST
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    // Firestore Collections
     const itemsCollection = db.collection("items");
     const inboxCollection = db.collection("inbox");
 
-    // Local Storage Keys (Fallback & Offline Support)
-    const STORAGE_KEY_ITEMS = 'omnisync_items_cloud_cache';
-    const STORAGE_KEY_INBOX = 'omnisync_inbox_cloud_cache';
+    // Local Storage Keys
+    const STORAGE_KEY_ITEMS = 'omnisync_items_v6';
+    const STORAGE_KEY_INBOX = 'omnisync_inbox_v6';
     const STORAGE_KEY_ALLOWED_EMAIL = 'omnisync_allowed_email';
 
-    // Owner Email Guard
     let allowedEmail = localStorage.getItem(STORAGE_KEY_ALLOWED_EMAIL) || "";
     document.getElementById('inputCustomAllowedEmail').value = allowedEmail;
 
     function saveAllowedEmail() {
       const email = document.getElementById('inputCustomAllowedEmail').value.trim();
-      if (!email) {
-        showToast("Enter a valid email address");
-        return;
-      }
       localStorage.setItem(STORAGE_KEY_ALLOWED_EMAIL, email);
       allowedEmail = email;
-      showToast("Target email saved: " + email);
+      showToast(email ? "Target email saved: " + email : "Email guard reset");
     }
 
-    // Auth State Monitor
+    // Google Auth Guard
     auth.onAuthStateChanged((user) => {
       const lockScreen = document.getElementById("auth-lock-screen");
       const authError = document.getElementById("auth-error");
 
       if (user) {
-        // If allowedEmail is empty, adopt the first logged-in user as owner
         if (!allowedEmail) {
           allowedEmail = user.email;
           localStorage.setItem(STORAGE_KEY_ALLOWED_EMAIL, allowedEmail);
@@ -727,7 +808,7 @@
       });
     }
 
-    // State Variables
+    // Application State
     let items = [];
     let inboxItems = [];
     let currentActiveItemId = null;
@@ -735,8 +816,10 @@
     let currentOmniFilterType = 'all';
     let currentInboxType = 'note';
     let stagedUploadedFile = null;
+    let stagedCreateModalPoints = [];
+    let activePointType = 'text';
 
-    // Load initial local cache for instant zero-latency UI
+    // Local Cache Read
     try {
       const cached = localStorage.getItem(STORAGE_KEY_ITEMS);
       if (cached) items = JSON.parse(cached);
@@ -744,9 +827,8 @@
       if (cachedInbox) inboxItems = JSON.parse(cachedInbox);
     } catch(e) {}
 
-    // REAL-TIME FIRESTORE SYNC: PC, Laptop & Phone live WebSockets
+    // Real-Time Cloud Listeners
     function initFirestoreListeners() {
-      // 1. Items Listener
       itemsCollection.onSnapshot((snapshot) => {
         items = [];
         snapshot.forEach((doc) => {
@@ -756,10 +838,9 @@
         enforceAllSidesMutualConsistency();
         renderActiveView();
       }, (error) => {
-        console.warn("Firestore items sync warning:", error);
+        console.warn("Firestore sync notice:", error);
       });
 
-      // 2. Inbox Listener
       inboxCollection.orderBy("timestamp", "desc").onSnapshot((snapshot) => {
         inboxItems = [];
         snapshot.forEach((doc) => {
@@ -768,11 +849,10 @@
         localStorage.setItem(STORAGE_KEY_INBOX, JSON.stringify(inboxItems));
         if (currentTab === 'inbox') renderInboxList();
       }, (error) => {
-        console.warn("Firestore inbox sync warning:", error);
+        console.warn("Firestore inbox notice:", error);
       });
     }
 
-    // Save Data across Cloud Firestore & Local Cache
     function saveData() {
       localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(items));
       localStorage.setItem(STORAGE_KEY_INBOX, JSON.stringify(inboxItems));
@@ -781,7 +861,7 @@
     function saveItemToCloud(item) {
       if (!item || !item.id) return;
       itemsCollection.doc(item.id).set(item, { merge: true }).catch(err => {
-        console.warn("Cloud write fallback to local:", err);
+        console.warn("Cloud write fallback to local storage:", err);
       });
     }
 
@@ -792,18 +872,13 @@
       });
     }
 
-    // Helper: Dynamic View Switcher
     function renderActiveView() {
-      if (currentTab === 'home') {
-        renderDirectoryList();
-      } else if (currentTab === 'detail') {
-        renderDetailView();
-      } else if (currentTab === 'inbox') {
-        renderInboxList();
-      }
+      if (currentTab === 'home') renderDirectoryList();
+      else if (currentTab === 'detail') renderDetailView();
+      else if (currentTab === 'inbox') renderInboxList();
     }
 
-    // Mutual "All-Sides" Graph Consistency
+    // Mutual Link Consistency
     function enforceAllSidesMutualConsistency() {
       items.forEach(source => {
         if (!source.linkedItemIds) source.linkedItemIds = [];
@@ -886,7 +961,7 @@
       const newItem = {
         id: newId,
         title: rawTitle,
-        description: `Created & linked via connection manager on ${new Date().toLocaleDateString()}`,
+        description: `Created & linked via connection manager`,
         createdAt: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }),
         linkedItemIds: [],
         details: []
@@ -899,7 +974,7 @@
         linkItemsMutually(currentActiveItemId, newId);
         renderDetailView();
         populateDirectConnectionCheckboxes();
-        showToast(`Created "${rawTitle}" & linked both ways!`);
+        showToast(`Created "${rawTitle}" & linked mutually!`);
       } else if (context === 'modal') {
         const currentModalId = document.getElementById('editItemId').value;
         if (currentModalId) {
@@ -917,121 +992,389 @@
       renderDirectoryList();
     }
 
-    // Live Clock
-    function startClock() {
-      const dateEl = document.getElementById('headerDate');
-      const timeEl = document.getElementById('headerTime');
-      function update() {
-        const now = new Date();
-        const dateOptions = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
-        dateEl.textContent = now.toLocaleDateString(undefined, dateOptions);
-        timeEl.textContent = now.toLocaleTimeString();
-      }
-      update();
-      setInterval(update, 1000);
-    }
-
-    // Toast
-    function showToast(message) {
-      const toast = document.getElementById('toast');
-      const msg = document.getElementById('toastMsg');
-      msg.textContent = message;
-      toast.classList.remove('opacity-0', '-translate-y-2', 'pointer-events-none');
-      toast.classList.add('opacity-100', 'translate-y-0');
-      setTimeout(() => {
-        toast.classList.remove('opacity-100', 'translate-y-0');
-        toast.classList.add('opacity-0', '-translate-y-2', 'pointer-events-none');
-      }, 2500);
-    }
-
-    // Copy to Clipboard
-    function copyToClipboard(text, label = "Text") {
-      const tempInput = document.createElement("input");
-      tempInput.style.position = "fixed";
-      tempInput.style.opacity = "0";
-      tempInput.value = text;
-      document.body.appendChild(tempInput);
-      tempInput.select();
-      try {
-        document.execCommand('copy');
-        showToast(`${label} copied!`);
-      } catch (err) {
-        showToast("Could not copy automatically");
-      }
-      document.body.removeChild(tempInput);
-    }
-
-    // Navigation Switcher
-    function switchMainTab(tab) {
-      currentTab = tab;
-      
-      const viewHome = document.getElementById('viewHome');
-      const viewDetail = document.getElementById('viewDetail');
-      const viewInbox = document.getElementById('viewInbox');
-
-      viewHome.classList.add('hidden');
-      viewDetail.classList.add('hidden');
-      viewInbox.classList.add('hidden');
-
-      const tabLeft = document.getElementById('navTabLeft');
-      const tabRight = document.getElementById('navTabRight');
-      
-      tabLeft.classList.remove('text-sky-600');
-      tabRight.classList.remove('text-sky-600');
-      tabLeft.classList.add('text-slate-500');
-      tabRight.classList.add('text-slate-500');
-
-      if (tab === 'home') {
-        viewHome.classList.remove('hidden');
-        tabRight.classList.remove('text-slate-500');
-        tabRight.classList.add('text-sky-600');
-        renderDirectoryList();
-      } else if (tab === 'detail') {
-        viewDetail.classList.remove('hidden');
-        renderDetailView();
-      } else if (tab === 'inbox') {
-        viewInbox.classList.remove('hidden');
-        tabLeft.classList.remove('text-slate-500');
-        tabLeft.classList.add('text-sky-600');
-        renderInboxList();
-      }
-    }
-
-    function goToHomeDefault() {
-      clearOmniSearch();
-      switchMainTab('home');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function clearOmniSearch() {
-      const searchInput = document.getElementById('directoryOmniSearchInput');
-      searchInput.value = '';
-      document.getElementById('clearSearchBtn').classList.add('hidden');
-      currentOmniFilterType = 'all';
-      updateFilterChipsUI();
-      renderDirectoryList();
-    }
-
-    function setOmniFilterType(type) {
-      currentOmniFilterType = type;
-      updateFilterChipsUI();
-      renderDirectoryList();
-    }
-
-    function updateFilterChipsUI() {
-      document.querySelectorAll('.omni-filter-chip').forEach(chip => {
-        const chipType = chip.getAttribute('data-filter');
-        if (chipType === currentOmniFilterType) {
-          chip.classList.remove('bg-white', 'text-slate-600');
-          chip.classList.add('bg-slate-900', 'text-white');
-        } else {
-          chip.classList.remove('bg-slate-900', 'text-white');
-          chip.classList.add('bg-white', 'text-slate-600');
-        }
+    // ==========================================
+    // REDESIGNED DETAIL POINT CREATOR LOGIC
+    // ==========================================
+    function switchPointType(type) {
+      activePointType = type;
+      document.querySelectorAll('.type-picker-btn').forEach(b => {
+        b.classList.remove('border-sky-500', 'bg-sky-50', 'text-sky-700', 'font-bold');
+        b.classList.add('border-slate-200', 'bg-slate-50', 'text-slate-600', 'font-semibold');
       });
+
+      const activeBtn = document.getElementById(`btnType_${type}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('border-slate-200', 'bg-slate-50', 'text-slate-600');
+        activeBtn.classList.add('border-sky-500', 'bg-sky-50', 'text-sky-700', 'font-bold');
+      }
+
+      const valLabel = document.getElementById('detailValueLabel');
+      const valInput = document.getElementById('inputDetailValue');
+
+      if (type === 'phone') {
+        valLabel.textContent = "Phone Number (Actionable Call / WhatsApp) *";
+        valInput.placeholder = "+91 98765 43210";
+      } else if (type === 'email') {
+        valLabel.textContent = "Email Address (Click-to-Mail) *";
+        valInput.placeholder = "user@example.com";
+      } else if (type === 'media') {
+        valLabel.textContent = "Media Description / Caption / Web URL";
+        valInput.placeholder = "Caption, notes, or direct web media link...";
+      } else {
+        valLabel.textContent = "Point Content / Text Note *";
+        valInput.placeholder = "Enter your notes, description, or paste any content...";
+      }
     }
 
-    // DIRECT DATA EXTRACTION & DIRECT ROSTER RENDERER
+    function applyPresetLabel(label, type) {
+      document.getElementById('inputDetailCategory').value = label;
+      if (type) switchPointType(type);
+    }
+
+    function processUniversalFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        let detectedType = 'file';
+        let iconHtml = '<i class="fa-solid fa-file-lines text-slate-600"></i>';
+
+        if (file.type.startsWith('image/')) {
+          detectedType = 'image';
+          iconHtml = '<i class="fa-solid fa-image text-amber-500"></i>';
+          activePointType = 'media';
+        } else if (file.type.startsWith('video/')) {
+          detectedType = 'video';
+          iconHtml = '<i class="fa-solid fa-video text-purple-500"></i>';
+          activePointType = 'media';
+        } else if (file.type.startsWith('audio/')) {
+          detectedType = 'voice';
+          iconHtml = '<i class="fa-solid fa-microphone text-teal-500"></i>';
+          activePointType = 'media';
+        } else if (file.type.includes('pdf')) {
+          detectedType = 'pdf';
+          iconHtml = '<i class="fa-solid fa-file-pdf text-rose-500"></i>';
+          activePointType = 'media';
+        }
+
+        stagedUploadedFile = {
+          name: file.name,
+          size: file.size,
+          mime: file.type,
+          dataUrl: e.target.result,
+          detectedType: detectedType
+        };
+
+        // If category is empty, suggest filename or type
+        const catInput = document.getElementById('inputDetailCategory');
+        if (!catInput.value.trim()) {
+          catInput.value = file.name.split('.')[0];
+        }
+
+        // Show preview card
+        const previewBox = document.getElementById('mediaUploadPreviewContainer');
+        previewBox.classList.remove('hidden');
+        document.getElementById('mediaPreviewFileName').textContent = file.name;
+        document.getElementById('mediaPreviewFileType').textContent = detectedType;
+        document.getElementById('mediaPreviewIcon').innerHTML = iconHtml;
+
+        showToast(`Loaded "${file.name}"`);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearStagedUpload() {
+      stagedUploadedFile = null;
+      document.getElementById('detailFileInput').value = '';
+      document.getElementById('mediaUploadPreviewContainer').classList.add('hidden');
+    }
+
+    // FIXED & ROBUST SAVE DETAIL POINT
+    function saveDetailPoint() {
+      const currentItem = items.find(it => it.id === currentActiveItemId);
+      if (!currentItem) {
+        showToast("Error: No item is currently open");
+        return;
+      }
+
+      const label = (document.getElementById('inputDetailCategory').value || '').trim() || 'General Point';
+      const rawValue = (document.getElementById('inputDetailValue').value || '').trim();
+
+      // Ensure there is either text content or an uploaded file
+      if (!rawValue && !stagedUploadedFile) {
+        showToast("Please enter text or attach a file");
+        document.getElementById('inputDetailValue').focus();
+        return;
+      }
+
+      let pointType = activePointType;
+      let finalValue = rawValue;
+      let fileName = undefined;
+
+      if (stagedUploadedFile) {
+        finalValue = stagedUploadedFile.dataUrl;
+        fileName = stagedUploadedFile.name;
+        pointType = stagedUploadedFile.detectedType;
+      }
+
+      if (!currentItem.details) {
+        currentItem.details = [];
+      }
+
+      const newPoint = {
+        id: 'pt_' + Date.now().toString(36),
+        category: label,
+        type: pointType,
+        value: finalValue,
+        notes: stagedUploadedFile ? rawValue : '',
+        fileName: fileName,
+        createdAt: new Date().toLocaleDateString()
+      };
+
+      currentItem.details.push(newPoint);
+
+      // Save both to local and cloud immediately
+      saveItemToCloud(currentItem);
+      saveData();
+
+      // Reset and close
+      clearStagedUpload();
+      document.getElementById('inputDetailValue').value = '';
+      document.getElementById('inputDetailCategory').value = '';
+      switchPointType('text');
+      closeModal('modalDetailPoint');
+
+      renderDetailView();
+      showToast(`Added point "${label}"`);
+    }
+
+    // QUICK PRESETS INSIDE 'CREATE NEW ITEM' MODAL
+    function presetModalAddPoint(type) {
+      let promptTitle = "Phone Number";
+      let placeholder = "+91 98765 43210";
+      if (type === 'email') { promptTitle = "Email Address"; placeholder = "name@company.com"; }
+      else if (type === 'image') { promptTitle = "Image URL or Caption"; placeholder = "https://... or photo note"; }
+      else if (type === 'video') { promptTitle = "Video Link / Tour"; placeholder = "https://... video url"; }
+      else if (type === 'voice') { promptTitle = "Voice Memo Note"; placeholder = "Audio summary or recording note"; }
+      else if (type === 'pdf') { promptTitle = "PDF / Document"; placeholder = "Document spec title or link"; }
+
+      const tempId = 'staged_' + Date.now().toString(36);
+      stagedCreateModalPoints.push({
+        tempId: tempId,
+        category: promptTitle,
+        type: type,
+        value: placeholder
+      });
+      renderModalStagedPoints();
+    }
+
+    function renderModalStagedPoints() {
+      const container = document.getElementById('modalStagedPointsList');
+      if (stagedCreateModalPoints.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+
+      let html = '';
+      stagedCreateModalPoints.forEach((pt, index) => {
+        html += `
+          <div class="bg-white p-2 rounded-xl border border-sky-200 flex items-center space-x-2 text-xs">
+            <span class="w-6 h-6 rounded-lg bg-sky-50 text-sky-700 flex items-center justify-center text-[10px] font-bold">
+              #${index + 1}
+            </span>
+            <input 
+              type="text" 
+              value="${escapeHtml(pt.category)}" 
+              onchange="updateStagedPointCategory('${pt.tempId}', this.value)" 
+              placeholder="Label" 
+              class="w-24 px-2 py-1 border border-slate-200 rounded-lg text-xs font-bold" 
+            />
+            <input 
+              type="text" 
+              value="${escapeHtml(pt.value)}" 
+              onchange="updateStagedPointValue('${pt.tempId}', this.value)" 
+              placeholder="Enter value / number..." 
+              class="flex-1 px-2 py-1 border border-slate-200 rounded-lg text-xs" 
+            />
+            <button type="button" onclick="removeStagedPoint('${pt.tempId}')" class="text-slate-400 hover:text-rose-500 p-1">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function updateStagedPointCategory(tempId, val) {
+      const p = stagedCreateModalPoints.find(x => x.tempId === tempId);
+      if (p) p.category = val;
+    }
+
+    function updateStagedPointValue(tempId, val) {
+      const p = stagedCreateModalPoints.find(x => x.tempId === tempId);
+      if (p) p.value = val;
+    }
+
+    function removeStagedPoint(tempId) {
+      stagedCreateModalPoints = stagedCreateModalPoints.filter(x => x.tempId !== tempId);
+      renderModalStagedPoints();
+    }
+
+    // Modal Create / Edit Item Handlers
+    function openCreateItemModal() {
+      document.getElementById('editItemId').value = '';
+      document.getElementById('inputItemTitle').value = '';
+      document.getElementById('inputItemDesc').value = '';
+      document.getElementById('inputQuickNewConnectedItem').value = '';
+      document.getElementById('modalItemHeaderTitle').textContent = 'Create New Item';
+      stagedCreateModalPoints = [];
+      renderModalStagedPoints();
+      populateLinkSelector([]);
+      openModal('modalItem');
+    }
+
+    function populateLinkSelector(selectedIds = []) {
+      const container = document.getElementById('linkSelectorContainer');
+      const currentEditId = document.getElementById('editItemId').value;
+      const candidates = items.filter(it => it.id !== currentEditId);
+
+      if (candidates.length === 0) {
+        container.innerHTML = `<p class="text-[11px] text-slate-400 italic p-1">No other items exist yet. Use the field above to add one!</p>`;
+        return;
+      }
+
+      let html = '';
+      candidates.forEach(cand => {
+        const isChecked = selectedIds.includes(cand.id) ? 'checked' : '';
+        html += `
+          <label class="flex items-center space-x-2 text-xs text-slate-700 hover:bg-slate-50 p-1.5 rounded-lg cursor-pointer transition">
+            <input type="checkbox" value="${cand.id}" class="link-item-checkbox rounded text-sky-600 focus:ring-sky-500" ${isChecked} />
+            <span class="font-semibold truncate">${escapeHtml(cand.title)}</span>
+          </label>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function saveItemRecord() {
+      const titleInput = document.getElementById('inputItemTitle');
+      const descInput = document.getElementById('inputItemDesc');
+      const editId = document.getElementById('editItemId').value;
+
+      const title = titleInput.value.trim();
+      if (!title) {
+        titleInput.focus();
+        showToast("Please provide an Item title");
+        return;
+      }
+
+      const selectedLinks = [];
+      document.querySelectorAll('.link-item-checkbox:checked').forEach(cb => {
+        selectedLinks.push(cb.value);
+      });
+
+      if (editId) {
+        const item = items.find(it => it.id === editId);
+        if (item) {
+          item.title = title;
+          item.description = descInput.value.trim();
+          setMutualLinksForSource(item.id, selectedLinks);
+          saveItemToCloud(item);
+          saveData();
+          showToast("Item updated");
+        }
+      } else {
+        const newId = 'item_' + Date.now().toString(36);
+        const compiledDetails = stagedCreateModalPoints.map((pt, i) => ({
+          id: 'pt_' + Date.now().toString(36) + '_' + i,
+          category: pt.category || 'General',
+          type: pt.type || 'text',
+          value: pt.value || ''
+        }));
+
+        const newItem = {
+          id: newId,
+          title: title,
+          description: descInput.value.trim(),
+          createdAt: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }),
+          linkedItemIds: [],
+          details: compiledDetails
+        };
+
+        items.push(newItem);
+        setMutualLinksForSource(newId, selectedLinks);
+        saveItemToCloud(newItem);
+        saveData();
+        showToast("Item created!");
+        currentActiveItemId = newId;
+        switchMainTab('detail');
+      }
+
+      closeModal('modalItem');
+      renderDirectoryList();
+    }
+
+    document.getElementById('btnEditItem').addEventListener('click', () => {
+      const item = items.find(it => it.id === currentActiveItemId);
+      if (!item) return;
+      document.getElementById('editItemId').value = item.id;
+      document.getElementById('inputItemTitle').value = item.title;
+      document.getElementById('inputItemDesc').value = item.description || '';
+      document.getElementById('inputQuickNewConnectedItem').value = '';
+      document.getElementById('modalItemHeaderTitle').textContent = 'Edit Item & Connections';
+      stagedCreateModalPoints = [];
+      renderModalStagedPoints();
+      populateLinkSelector(item.linkedItemIds || []);
+      openModal('modalItem');
+    });
+
+    document.getElementById('btnDeleteItem').addEventListener('click', () => {
+      if (!currentActiveItemId) return;
+      const targetItem = items.find(it => it.id === currentActiveItemId);
+      const title = targetItem ? targetItem.title : "this item";
+
+      showConfirmModal(
+        "Delete Item", 
+        `Are you sure you want to permanently delete "${title}"? This will remove all its points and mutual links.`,
+        () => {
+          const targetId = currentActiveItemId;
+          deleteItemFromCloud(targetId);
+          items.forEach(it => {
+            if (it.linkedItemIds && it.linkedItemIds.includes(targetId)) {
+              it.linkedItemIds = it.linkedItemIds.filter(id => id !== targetId);
+              saveItemToCloud(it);
+            }
+          });
+          items = items.filter(it => it.id !== targetId);
+          saveData();
+          showToast("Item deleted permanently");
+          currentActiveItemId = null;
+          switchMainTab('home');
+        }
+      );
+    });
+
+    // Detail Point Modal Trigger
+    document.getElementById('btnOpenAddDetailModal').addEventListener('click', () => {
+      document.getElementById('inputDetailCategory').value = '';
+      document.getElementById('inputDetailValue').value = '';
+      clearStagedUpload();
+      switchPointType('text');
+      openModal('modalDetailPoint');
+    });
+
+    function deleteDetailPoint(pointId) {
+      const item = items.find(it => it.id === currentActiveItemId);
+      if (!item || !item.details) return;
+      item.details = item.details.filter(pt => pt.id !== pointId);
+      saveItemToCloud(item);
+      saveData();
+      renderDetailView();
+      showToast("Point removed");
+    }
+
+    // DIRECT EXTRACTION & DIRECT ROSTER RENDERER
     function renderDirectoryList() {
       const container = document.getElementById('itemsListContainer');
       const emptyState = document.getElementById('emptyItemsState');
@@ -1041,11 +1384,8 @@
       const query = (document.getElementById('directoryOmniSearchInput').value || '').trim().toLowerCase();
       const clearBtn = document.getElementById('clearSearchBtn');
 
-      if (query) {
-        clearBtn.classList.remove('hidden');
-      } else {
-        clearBtn.classList.add('hidden');
-      }
+      if (query) clearBtn.classList.remove('hidden');
+      else clearBtn.classList.add('hidden');
 
       if (currentOmniFilterType === 'phone') {
         viewTitle.textContent = "Direct Phonebook Roster";
@@ -1072,7 +1412,7 @@
         const phoneList = [];
         items.forEach(item => {
           (item.details || []).forEach(pt => {
-            if (pt.type === 'phone') {
+            if (pt.type === 'phone' || (pt.category && pt.category.toLowerCase().includes('phone'))) {
               phoneList.push({
                 itemId: item.id,
                 itemTitle: item.title,
@@ -1147,7 +1487,7 @@
         const emailList = [];
         items.forEach(item => {
           (item.details || []).forEach(pt => {
-            if (pt.type === 'email') {
+            if (pt.type === 'email' || (pt.category && pt.category.toLowerCase().includes('email'))) {
               emailList.push({
                 itemId: item.id,
                 itemTitle: item.title,
@@ -1217,7 +1557,7 @@
         const docList = [];
         items.forEach(item => {
           (item.details || []).forEach(pt => {
-            if (pt.type === 'pdf') {
+            if (pt.type === 'pdf' || (pt.fileName && pt.fileName.toLowerCase().endsWith('.pdf'))) {
               docList.push({
                 itemId: item.id,
                 itemTitle: item.title,
@@ -1419,8 +1759,8 @@
             const cat = pt.category && pt.category.toLowerCase().includes(query);
             const val = pt.value && pt.value.toLowerCase().includes(query);
             const fn = pt.fileName && pt.fileName.toLowerCase().includes(query);
-            const typ = pt.type && pt.type.toLowerCase().includes(query);
-            return cat || val || fn || typ;
+            const notes = pt.notes && pt.notes.toLowerCase().includes(query);
+            return cat || val || fn || notes;
           });
 
           const linkedMatch = (item.linkedItemIds || []).some(lid => {
@@ -1564,8 +1904,8 @@
       if (points.length === 0) {
         pointsContainer.innerHTML = `
           <div class="text-center py-8 bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-4">
-            <p class="text-xs text-slate-500">No detail points added yet.</p>
-            <p class="text-[11px] text-slate-400 mt-1">Add phone numbers, emails, photos, PDFs, or notes with categories.</p>
+            <p class="text-xs text-slate-500 font-semibold">No detail points added yet.</p>
+            <p class="text-[11px] text-slate-400 mt-1">Click "Add Point" to add text notes, phone numbers, emails, photos, videos, or PDFs.</p>
           </div>
         `;
         return;
@@ -1573,7 +1913,7 @@
 
       let pointsHtml = '';
       points.forEach((point, index) => {
-        let badgeColor = "bg-slate-100 text-slate-700";
+        let badgeColor = "bg-slate-100 text-slate-700 border-slate-200";
         let icon = "fa-circle-dot";
 
         if (point.type === 'phone') {
@@ -1598,7 +1938,7 @@
 
         let bodyContent = '';
         if (point.type === 'phone') {
-          const clean = point.value.replace(/[^0-9+]/g, '');
+          const clean = (point.value || '').replace(/[^0-9+]/g, '');
           bodyContent = `
             <div class="flex items-center justify-between">
               <a href="tel:${clean}" class="text-sm font-bold text-emerald-700 hover:underline flex items-center">
@@ -1626,6 +1966,7 @@
           bodyContent = `
             <div class="mt-1">
               <img src="${escapeHtml(point.value)}" alt="Point media" class="w-full max-h-56 object-cover rounded-xl border border-slate-200 shadow-xs" onerror="this.src='https://placehold.co/600x300/f1f5f9/64748b?text=Image+Preview'" />
+              ${point.notes ? `<p class="text-xs text-slate-600 mt-2">${escapeHtml(point.notes)}</p>` : ''}
             </div>
           `;
         } else if (point.type === 'video') {
@@ -1634,15 +1975,19 @@
               <video controls class="w-full max-h-56 rounded-xl border border-slate-200 bg-black">
                 <source src="${escapeHtml(point.value)}" type="video/mp4" />
               </video>
+              ${point.notes ? `<p class="text-xs text-slate-600 mt-2">${escapeHtml(point.notes)}</p>` : ''}
             </div>
           `;
         } else if (point.type === 'pdf') {
           bodyContent = `
-            <a href="${escapeHtml(point.value)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-2 bg-rose-50 border border-rose-200 p-2.5 rounded-xl text-xs font-semibold text-rose-800 hover:bg-rose-100 transition">
-              <i class="fa-solid fa-file-pdf text-base text-rose-600"></i>
-              <span class="truncate max-w-[220px]">${escapeHtml(point.fileName || point.value)}</span>
-              <span class="text-[10px] bg-white px-2 py-0.5 rounded text-rose-700 font-bold border border-rose-200">Open File</span>
-            </a>
+            <div>
+              <a href="${escapeHtml(point.value)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-2 bg-rose-50 border border-rose-200 p-2.5 rounded-xl text-xs font-semibold text-rose-800 hover:bg-rose-100 transition">
+                <i class="fa-solid fa-file-pdf text-base text-rose-600"></i>
+                <span class="truncate max-w-[220px]">${escapeHtml(point.fileName || point.value)}</span>
+                <span class="text-[10px] bg-white px-2 py-0.5 rounded text-rose-700 font-bold border border-rose-200">Open File</span>
+              </a>
+              ${point.notes ? `<p class="text-xs text-slate-600 mt-1.5">${escapeHtml(point.notes)}</p>` : ''}
+            </div>
           `;
         } else if (point.type === 'voice') {
           bodyContent = `
@@ -1655,12 +2000,12 @@
             </div>
           `;
         } else {
-          bodyContent = `<p class="text-xs sm:text-sm text-slate-700 whitespace-pre-line">${escapeHtml(point.value)}</p>`;
+          bodyContent = `<p class="text-xs sm:text-sm text-slate-700 whitespace-pre-line leading-relaxed">${escapeHtml(point.value)}</p>`;
         }
 
         pointsHtml += `
           <div class="p-3.5 bg-white border border-slate-200 rounded-2xl shadow-xs hover:border-slate-300 transition">
-            <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-slate-100">
               <div class="flex items-center space-x-2">
                 <span class="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${badgeColor}">
                   <i class="fa-solid ${icon} mr-1 text-[9px]"></i> ${escapeHtml(point.category || "General")}
@@ -1789,242 +2134,6 @@
       container.innerHTML = html;
     }
 
-    function openCreateItemModal() {
-      document.getElementById('editItemId').value = '';
-      document.getElementById('inputItemTitle').value = '';
-      document.getElementById('inputItemDesc').value = '';
-      document.getElementById('inputQuickNewConnectedItem').value = '';
-      document.getElementById('modalItemHeaderTitle').textContent = 'Create New Item';
-      populateLinkSelector([]);
-      openModal('modalItem');
-    }
-
-    function populateLinkSelector(selectedIds = []) {
-      const container = document.getElementById('linkSelectorContainer');
-      const currentEditId = document.getElementById('editItemId').value;
-      const candidates = items.filter(it => it.id !== currentEditId);
-
-      if (candidates.length === 0) {
-        container.innerHTML = `<p class="text-[11px] text-slate-400 italic p-1">No other items exist yet. Use the field above to add one!</p>`;
-        return;
-      }
-
-      let html = '';
-      candidates.forEach(cand => {
-        const isChecked = selectedIds.includes(cand.id) ? 'checked' : '';
-        html += `
-          <label class="flex items-center space-x-2 text-xs text-slate-700 hover:bg-slate-50 p-1.5 rounded-lg cursor-pointer transition">
-            <input type="checkbox" value="${cand.id}" class="link-item-checkbox rounded text-sky-600 focus:ring-sky-500" ${isChecked} />
-            <span class="font-semibold truncate">${escapeHtml(cand.title)}</span>
-          </label>
-        `;
-      });
-      container.innerHTML = html;
-    }
-
-    function saveItemRecord() {
-      const titleInput = document.getElementById('inputItemTitle');
-      const descInput = document.getElementById('inputItemDesc');
-      const editId = document.getElementById('editItemId').value;
-
-      const title = titleInput.value.trim();
-      if (!title) {
-        titleInput.focus();
-        showToast("Please provide an Item title");
-        return;
-      }
-
-      const selectedLinks = [];
-      document.querySelectorAll('.link-item-checkbox:checked').forEach(cb => {
-        selectedLinks.push(cb.value);
-      });
-
-      if (editId) {
-        const item = items.find(it => it.id === editId);
-        if (item) {
-          item.title = title;
-          item.description = descInput.value.trim();
-          setMutualLinksForSource(item.id, selectedLinks);
-          saveItemToCloud(item);
-          saveData();
-          showToast("Item and mutual links updated");
-        }
-      } else {
-        const newId = 'item_' + Date.now().toString(36);
-        const newItem = {
-          id: newId,
-          title: title,
-          description: descInput.value.trim(),
-          createdAt: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }),
-          linkedItemIds: [],
-          details: []
-        };
-        items.push(newItem);
-        setMutualLinksForSource(newId, selectedLinks);
-        saveItemToCloud(newItem);
-        saveData();
-        showToast("Item created with all-sided links!");
-        currentActiveItemId = newId;
-        switchMainTab('detail');
-      }
-
-      closeModal('modalItem');
-      renderDirectoryList();
-    }
-
-    document.getElementById('btnEditItem').addEventListener('click', () => {
-      const item = items.find(it => it.id === currentActiveItemId);
-      if (!item) return;
-      document.getElementById('editItemId').value = item.id;
-      document.getElementById('inputItemTitle').value = item.title;
-      document.getElementById('inputItemDesc').value = item.description || '';
-      document.getElementById('inputQuickNewConnectedItem').value = '';
-      document.getElementById('modalItemHeaderTitle').textContent = 'Edit Item & Connections';
-      populateLinkSelector(item.linkedItemIds || []);
-      openModal('modalItem');
-    });
-
-    document.getElementById('btnDeleteItem').addEventListener('click', () => {
-      if (!currentActiveItemId) return;
-      const targetItem = items.find(it => it.id === currentActiveItemId);
-      const title = targetItem ? targetItem.title : "this item";
-
-      showConfirmModal(
-        "Delete Item", 
-        `Are you sure you want to permanently delete "${title}"? This cannot be undone.`,
-        () => {
-          const targetId = currentActiveItemId;
-          deleteItemFromCloud(targetId);
-          items.forEach(it => {
-            if (it.linkedItemIds && it.linkedItemIds.includes(targetId)) {
-              it.linkedItemIds = it.linkedItemIds.filter(id => id !== targetId);
-              saveItemToCloud(it);
-            }
-          });
-          items = items.filter(it => it.id !== targetId);
-          saveData();
-          showToast("Item deleted permanently");
-          currentActiveItemId = null;
-          switchMainTab('home');
-        }
-      );
-    });
-
-    // Detail Point Operations
-    document.getElementById('btnOpenAddDetailModal').addEventListener('click', () => {
-      document.getElementById('inputDetailCategory').value = '';
-      document.getElementById('inputDetailValue').value = '';
-      document.getElementById('inputDetailType').value = 'text';
-      handleDetailTypeChange('text');
-      openModal('modalDetailPoint');
-    });
-
-    function applyQuickCategory(val) {
-      if (!val) return;
-      document.getElementById('inputDetailCategory').value = val;
-      if (val === 'Phone Number') {
-        document.getElementById('inputDetailType').value = 'phone';
-        handleDetailTypeChange('phone');
-      } else if (val === 'Official Email') {
-        document.getElementById('inputDetailType').value = 'email';
-        handleDetailTypeChange('email');
-      } else if (val === 'PDF Document') {
-        document.getElementById('inputDetailType').value = 'pdf';
-        handleDetailTypeChange('pdf');
-      } else if (val === 'Site Photo') {
-        document.getElementById('inputDetailType').value = 'image';
-        handleDetailTypeChange('image');
-      } else if (val === 'Video Tour') {
-        document.getElementById('inputDetailType').value = 'video';
-        handleDetailTypeChange('video');
-      } else if (val === 'Voice Memo') {
-        document.getElementById('inputDetailType').value = 'voice';
-        handleDetailTypeChange('voice');
-      }
-    }
-
-    function handleDetailTypeChange(type) {
-      const fileHelper = document.getElementById('detailFileHelper');
-      const valLabel = document.getElementById('detailValueLabel');
-      const valInput = document.getElementById('inputDetailValue');
-
-      if (type === 'image' || type === 'pdf' || type === 'video') {
-        fileHelper.classList.remove('hidden');
-        valLabel.textContent = `${type.toUpperCase()} File URL or upload below`;
-        valInput.placeholder = `Enter online URL or pick a file below...`;
-      } else if (type === 'phone') {
-        fileHelper.classList.add('hidden');
-        valLabel.textContent = "Phone Number (Click-to-Call)";
-        valInput.placeholder = "+91 98765 43210";
-      } else if (type === 'email') {
-        fileHelper.classList.add('hidden');
-        valLabel.textContent = "Email Address (Click-to-Mail)";
-        valInput.placeholder = "contact@example.com";
-      } else if (type === 'voice') {
-        fileHelper.classList.add('hidden');
-        valLabel.textContent = "Voice Memo Transcription / Summary";
-        valInput.placeholder = "Details of recorded note...";
-      } else {
-        fileHelper.classList.add('hidden');
-        valLabel.textContent = "Detail Content / Text Note";
-        valInput.placeholder = "Enter your note or detail point...";
-      }
-    }
-
-    function processDetailFileUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById('inputDetailValue').value = e.target.result;
-        stagedUploadedFile = { name: file.name, size: file.size };
-        showToast(`Loaded "${file.name}"`);
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function saveDetailPoint() {
-      const item = items.find(it => it.id === currentActiveItemId);
-      if (!item) return;
-
-      const category = document.getElementById('inputDetailCategory').value.trim() || 'General';
-      const type = document.getElementById('inputDetailType').value;
-      const value = document.getElementById('inputDetailValue').value.trim();
-
-      if (!value) {
-        showToast("Please enter a value or choose a file");
-        return;
-      }
-
-      if (!item.details) item.details = [];
-      const newPoint = {
-        id: 'pt_' + Date.now().toString(36),
-        category: category,
-        type: type,
-        value: value,
-        fileName: stagedUploadedFile ? stagedUploadedFile.name : undefined
-      };
-
-      item.details.push(newPoint);
-      saveItemToCloud(item);
-      saveData();
-      stagedUploadedFile = null;
-      closeModal('modalDetailPoint');
-      renderDetailView();
-      showToast("Detail point added");
-    }
-
-    function deleteDetailPoint(pointId) {
-      const item = items.find(it => it.id === currentActiveItemId);
-      if (!item || !item.details) return;
-      item.details = item.details.filter(pt => pt.id !== pointId);
-      saveItemToCloud(item);
-      saveData();
-      renderDetailView();
-      showToast("Point removed");
-    }
-
-    // Quick Inbox Operations
     function setInboxType(type) {
       currentInboxType = type;
       document.querySelectorAll('.inbox-type-btn').forEach(b => {
@@ -2062,7 +2171,7 @@
       statusEl.textContent = "Listening... (Simulating 3s recording)";
       setTimeout(() => {
         statusEl.textContent = "Recording captured!";
-        document.getElementById('inboxRawInput').value = "Voice Memo: Review blueprints with team.";
+        document.getElementById('inboxRawInput').value = "Voice Memo: Review notes and follow-up items.";
         showToast("Voice note captured");
       }, 1200);
     });
@@ -2203,7 +2312,7 @@
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      showToast("Database file exported!");
+      showToast("Database exported!");
     }
 
     function importDatabaseJSON(event) {
@@ -2219,7 +2328,7 @@
             if (Array.isArray(parsed.inbox)) {
               parsed.inbox.forEach(ib => inboxCollection.doc(ib.id).set(ib));
             }
-            showToast("Database uploaded to Cloud!");
+            showToast("Database imported & synced to cloud!");
             closeModal('modalSyncBackup');
           }
         } catch (err) {
@@ -2252,6 +2361,117 @@
       modal.classList.remove('flex');
     }
 
+    // Clock
+    function startClock() {
+      const dateEl = document.getElementById('headerDate');
+      const timeEl = document.getElementById('headerTime');
+      function update() {
+        const now = new Date();
+        const dateOptions = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+        dateEl.textContent = now.toLocaleDateString(undefined, dateOptions);
+        timeEl.textContent = now.toLocaleTimeString();
+      }
+      update();
+      setInterval(update, 1000);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const msg = document.getElementById('toastMsg');
+      msg.textContent = message;
+      toast.classList.remove('opacity-0', '-translate-y-2', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', '-translate-y-2', 'pointer-events-none');
+      }, 2500);
+    }
+
+    function copyToClipboard(text, label = "Text") {
+      const tempInput = document.createElement("input");
+      tempInput.style.position = "fixed";
+      tempInput.style.opacity = "0";
+      tempInput.value = text;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      try {
+        document.execCommand('copy');
+        showToast(`${label} copied!`);
+      } catch (err) {
+        showToast("Could not copy automatically");
+      }
+      document.body.removeChild(tempInput);
+    }
+
+    function switchMainTab(tab) {
+      currentTab = tab;
+      
+      const viewHome = document.getElementById('viewHome');
+      const viewDetail = document.getElementById('viewDetail');
+      const viewInbox = document.getElementById('viewInbox');
+
+      viewHome.classList.add('hidden');
+      viewDetail.classList.add('hidden');
+      viewInbox.classList.add('hidden');
+
+      const tabLeft = document.getElementById('navTabLeft');
+      const tabRight = document.getElementById('navTabRight');
+      
+      tabLeft.classList.remove('text-sky-600');
+      tabRight.classList.remove('text-sky-600');
+      tabLeft.classList.add('text-slate-500');
+      tabRight.classList.add('text-slate-500');
+
+      if (tab === 'home') {
+        viewHome.classList.remove('hidden');
+        tabRight.classList.remove('text-slate-500');
+        tabRight.classList.add('text-sky-600');
+        renderDirectoryList();
+      } else if (tab === 'detail') {
+        viewDetail.classList.remove('hidden');
+        renderDetailView();
+      } else if (tab === 'inbox') {
+        viewInbox.classList.remove('hidden');
+        tabLeft.classList.remove('text-slate-500');
+        tabLeft.classList.add('text-sky-600');
+        renderInboxList();
+      }
+    }
+
+    function goToHomeDefault() {
+      clearOmniSearch();
+      switchMainTab('home');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function clearOmniSearch() {
+      const searchInput = document.getElementById('directoryOmniSearchInput');
+      searchInput.value = '';
+      document.getElementById('clearSearchBtn').classList.add('hidden');
+      currentOmniFilterType = 'all';
+      updateFilterChipsUI();
+      renderDirectoryList();
+    }
+
+    function setOmniFilterType(type) {
+      currentOmniFilterType = type;
+      updateFilterChipsUI();
+      renderDirectoryList();
+    }
+
+    function updateFilterChipsUI() {
+      document.querySelectorAll('.omni-filter-chip').forEach(chip => {
+        const chipType = chip.getAttribute('data-filter');
+        if (chipType === currentOmniFilterType) {
+          chip.classList.remove('bg-white', 'text-slate-600');
+          chip.classList.add('bg-slate-900', 'text-white');
+        } else {
+          chip.classList.remove('bg-slate-900', 'text-white');
+          chip.classList.add('bg-white', 'text-slate-600');
+        }
+      });
+    }
+
     document.getElementById('directoryOmniSearchInput').addEventListener('input', () => {
       renderDirectoryList();
     });
@@ -2266,16 +2486,15 @@
         .replace(/'/g, '&#039;');
     }
 
-    // Register Progressive Web App Service Worker
+    // PWA Service Worker Registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('PWA ServiceWorker active:', reg.scope))
-          .catch(err => console.log('ServiceWorker note:', err));
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('ServiceWorker ready:', reg.scope))
+          .catch(err => console.log('ServiceWorker notice:', err));
       });
     }
 
-    // Startup
     window.addEventListener('DOMContentLoaded', () => {
       startClock();
       renderDirectoryList();
