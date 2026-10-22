@@ -6,7 +6,7 @@
   <title>OmniSync Personal Directory</title>
 
   <!-- PWA & Mobile Web Meta -->
-  <link rel="manifest" href="manifest.json" />
+  <link rel="manifest" href="./manifest.json" />
   <meta name="theme-color" content="#0284c7" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -99,7 +99,7 @@
   <!-- Main Device Shell -->
   <div id="appContainer" class="w-full max-w-md md:max-w-xl lg:max-w-2xl bg-white shadow-2xl min-h-screen flex flex-col relative border-x border-slate-200">
     
-    <!-- TOP HEADER: LIVE DATE, TIME & STATUS -->
+    <!-- TOP HEADER: LIVE RUNNING DATE & TIME -->
     <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 px-4 sm:px-5 py-3 flex items-center justify-between shadow-xs select-none">
       <div class="flex items-center space-x-2">
         <span id="cloudStatusDot" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" title="Cloud Synced"></span>
@@ -117,7 +117,7 @@
       </div>
     </header>
 
-    <!-- Animated Toast -->
+    <!-- Animated Toast Notification -->
     <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 opacity-0 pointer-events-none transform -translate-y-2 bg-slate-900 text-white text-xs sm:text-sm px-4 py-2 rounded-full shadow-xl flex items-center space-x-2 border border-slate-700">
       <i class="fa-solid fa-circle-check text-emerald-400"></i>
       <span id="toastMsg">Action completed</span>
@@ -141,7 +141,7 @@
     <!-- MAIN CONTENT VIEW AREA -->
     <main class="flex-1 overflow-y-auto pb-safe">
 
-      <!-- SCREEN 1: DEFAULT HOME (Directory & Direct Extraction Rosters) -->
+      <!-- SCREEN 1: DEFAULT HOME (Contact Book Directory & Direct Extraction Rosters) -->
       <section id="viewHome" class="p-4 sm:p-5">
         <div class="flex items-center justify-between mb-3">
           <div>
@@ -160,7 +160,7 @@
             <input 
               type="text" 
               id="directoryOmniSearchInput" 
-              placeholder="Search anything: names, phone, email, pdfs, media, labels..." 
+              placeholder="Search anything: names, labels, phone, email, pdfs, media..." 
               class="w-full pl-10 pr-9 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition shadow-2xs"
             />
             <button id="clearSearchBtn" onclick="clearOmniSearch()" class="hidden absolute right-3 top-3 text-slate-400 hover:text-slate-600 text-sm">
@@ -189,6 +189,16 @@
               <i class="fa-solid fa-circle-nodes mr-1 text-[10px] text-indigo-600"></i>Relationship Graph
             </button>
           </div>
+
+          <!-- DYNAMIC FILTER BY LABEL BAR -->
+          <div class="mt-2.5 pt-2 border-t border-slate-200/70 flex items-center space-x-1.5 overflow-x-auto no-scrollbar">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1">
+              <i class="fa-solid fa-tags text-[9px] mr-1"></i>Labels:
+            </span>
+            <div id="dynamicLabelFilterContainer" class="flex items-center space-x-1.5 shrink-0">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
         </div>
 
         <!-- Dynamic Results Container -->
@@ -204,7 +214,7 @@
         </div>
       </section>
 
-      <!-- SCREEN 2: ITEM DETAIL VIEW -->
+      <!-- SCREEN 2: ITEM DETAIL & FULL CONNECTIONS VIEW -->
       <section id="viewDetail" class="hidden p-4 sm:p-5">
         <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-200">
           <button onclick="switchMainTab('home')" class="inline-flex items-center text-xs font-semibold text-slate-600 hover:text-sky-600 transition px-2 py-1.5 rounded-lg hover:bg-slate-100">
@@ -256,7 +266,7 @@
               <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center">
                 <i class="fa-solid fa-list-check mr-1.5 text-sky-600"></i> Details & Media Points
               </h3>
-              <p class="text-[10px] text-slate-400 mt-0.5">Text points, phone, email, media & docs</p>
+              <p class="text-[10px] text-slate-400 mt-0.5">Categorized text, contacts, media & documents</p>
             </div>
             <button id="btnOpenAddDetailModal" class="inline-flex items-center text-xs font-semibold bg-sky-600 text-white px-3.5 py-2 rounded-xl hover:bg-sky-700 transition shadow-xs">
               <i class="fa-solid fa-plus mr-1.5"></i> Add Point
@@ -330,7 +340,7 @@
 
     </main>
 
-    <!-- BOTTOM NAVIGATION TABS -->
+    <!-- BOTTOM NAVIGATION TABS (Strictly matching User Wireframe) -->
     <nav class="fixed md:absolute bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-300 py-2.5 px-6 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] flex items-center justify-around">
 
       <!-- LEFT TAB: DIAMOND (Quick Add) -->
@@ -353,7 +363,7 @@
         <span class="text-[10px] font-bold tracking-tight uppercase mt-1 text-sky-700">Add Item</span>
       </button>
 
-      <!-- RIGHT TAB: HEXAGON (Home) -->
+      <!-- RIGHT TAB: HEXAGON (Home - Returns to default view) -->
       <button id="navTabRight" onclick="goToHomeDefault()" class="group flex flex-col items-center justify-center p-1 text-sky-600 transition focus:outline-none">
         <div class="w-11 h-11 flex items-center justify-center rounded-xl group-hover:bg-sky-50 transition">
           <svg class="w-7 h-7 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -366,14 +376,14 @@
     </nav>
 
     <!-- ========================================================= -->
-    <!-- MODAL 1: CREATE OR EDIT STRUCTURED ITEM (With Quick Points)-->
+    <!-- MODAL 1: CREATE OR EDIT STRUCTURED ITEM                    -->
     <!-- ========================================================= -->
     <div id="modalItem" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
       <div class="bg-white rounded-3xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
         <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
           <div>
             <h3 id="modalItemHeaderTitle" class="text-base sm:text-lg font-bold text-slate-900">Create New Item</h3>
-            <p class="text-xs text-slate-500">Define the title, description, quick categories & mutual connections</p>
+            <p class="text-xs text-slate-500">Define the title, description, and mutual connections</p>
           </div>
           <button onclick="closeModal('modalItem')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 text-sm">
             <i class="fa-solid fa-xmark"></i>
@@ -391,43 +401,6 @@
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">General Description</label>
             <textarea id="inputItemDesc" rows="2" placeholder="Summary or overview of this item..." class="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none"></textarea>
-          </div>
-
-          <!-- QUICK CATEGORY BUILDER IN CREATE MODAL -->
-          <div class="border border-sky-100 rounded-2xl p-3.5 bg-sky-50/50">
-            <div class="flex items-center justify-between mb-2">
-              <label class="block text-xs font-bold uppercase tracking-wider text-sky-900">
-                <i class="fa-solid fa-bolt text-amber-500 mr-1"></i> Quick Add Details (Presets)
-              </label>
-              <span class="text-[10px] text-sky-700 bg-sky-100/80 px-2 py-0.5 rounded-md font-semibold">Ready to Fill</span>
-            </div>
-            <p class="text-[11px] text-slate-500 mb-3">Quickly add phone, email, photo, video, audio or docs right away:</p>
-            
-            <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 mb-3">
-              <button type="button" onclick="presetModalAddPoint('phone')" class="p-2 rounded-xl bg-white border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 text-slate-700 flex flex-col items-center text-[10px] font-bold transition">
-                <i class="fa-solid fa-phone text-emerald-600 mb-1 text-xs"></i> Phone
-              </button>
-              <button type="button" onclick="presetModalAddPoint('email')" class="p-2 rounded-xl bg-white border border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-slate-700 flex flex-col items-center text-[10px] font-bold transition">
-                <i class="fa-solid fa-envelope text-blue-600 mb-1 text-xs"></i> Email
-              </button>
-              <button type="button" onclick="presetModalAddPoint('image')" class="p-2 rounded-xl bg-white border border-slate-200 hover:border-amber-500 hover:bg-amber-50 text-slate-700 flex flex-col items-center text-[10px] font-bold transition">
-                <i class="fa-solid fa-image text-amber-600 mb-1 text-xs"></i> Image
-              </button>
-              <button type="button" onclick="presetModalAddPoint('video')" class="p-2 rounded-xl bg-white border border-slate-200 hover:border-purple-500 hover:bg-purple-50 text-slate-700 flex flex-col items-center text-[10px] font-bold transition">
-                <i class="fa-solid fa-video text-purple-600 mb-1 text-xs"></i> Video
-              </button>
-              <button type="button" onclick="presetModalAddPoint('voice')" class="p-2 rounded-xl bg-white border border-slate-200 hover:border-teal-500 hover:bg-teal-50 text-slate-700 flex flex-col items-center text-[10px] font-bold transition">
-                <i class="fa-solid fa-microphone text-teal-600 mb-1 text-xs"></i> Voice
-              </button>
-              <button type="button" onclick="presetModalAddPoint('pdf')" class="p-2 rounded-xl bg-white border border-slate-200 hover:border-rose-500 hover:bg-rose-50 text-slate-700 flex flex-col items-center text-[10px] font-bold transition">
-                <i class="fa-solid fa-file-pdf text-rose-600 mb-1 text-xs"></i> PDF/Doc
-              </button>
-            </div>
-
-            <!-- Staged Quick Points Container -->
-            <div id="modalStagedPointsList" class="space-y-2">
-              <!-- Rendered via JS -->
-            </div>
           </div>
 
           <!-- CONNECTED ITEMS WITH ON-THE-FLY CREATION -->
@@ -475,14 +448,14 @@
     </div>
 
     <!-- ========================================================= -->
-    <!-- MODAL 2: REDESIGNED RICH DETAIL POINT & MEDIA CREATOR     -->
+    <!-- MODAL 2: REDESIGNED DETAIL POINT CREATOR (TEXT OR MEDIA)   -->
     <!-- ========================================================= -->
     <div id="modalDetailPoint" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
       <div class="bg-white rounded-3xl w-full max-w-md max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
         <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
           <div>
             <h3 class="text-base font-bold text-slate-900">Add Detail Point</h3>
-            <p class="text-xs text-slate-500">Add searchable text, contact number, or any media</p>
+            <p class="text-xs text-slate-500">Choose mode, select or add label, and provide content</p>
           </div>
           <button onclick="closeModal('modalDetailPoint')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 text-sm">
             <i class="fa-solid fa-xmark"></i>
@@ -490,92 +463,157 @@
         </div>
 
         <div class="p-5 overflow-y-auto space-y-4">
-          <!-- 1. SEARCHABLE LABEL / CATEGORY -->
+          <!-- 1. DETAIL TYPE SELECTOR: 2 STREAMLINED MODES (TEXT vs MEDIA) -->
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-              Searchable Label / Category *
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+              Detail Type *
             </label>
-            <div class="relative">
+            <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+              <button 
+                type="button" 
+                id="btnModeText" 
+                onclick="setDetailMode('text')" 
+                class="py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-xs bg-white text-sky-700 border border-sky-200"
+              >
+                <i class="fa-solid fa-align-left text-sm"></i>
+                <span>Text Mode</span>
+              </button>
+              <button 
+                type="button" 
+                id="btnModeMedia" 
+                onclick="setDetailMode('media')" 
+                class="py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 transition text-slate-600 hover:text-slate-900"
+              >
+                <i class="fa-solid fa-photo-film text-sm"></i>
+                <span>Media Mode</span>
+              </button>
+            </div>
+            <p id="modeHelperText" class="text-[11px] text-slate-400 mt-1.5">
+              Enter notes, description, phone numbers, or emails. Action buttons will be auto-generated.
+            </p>
+          </div>
+
+          <!-- 2. DYNAMIC GLOBAL LABEL SYSTEM -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                Point Label *
+              </label>
+              <span class="text-[10px] text-sky-600 font-semibold bg-sky-50 px-2 py-0.5 rounded border border-sky-100">
+                Saved Globally
+              </span>
+            </div>
+
+            <!-- Existing Label Dropdown / Picker -->
+            <div class="relative mb-2">
+              <select 
+                id="selectGlobalLabel" 
+                onchange="handleSelectExistingLabel(this.value)" 
+                class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none bg-slate-50 font-medium text-slate-700"
+              >
+                <option value="">-- Choose from existing labels --</option>
+              </select>
+            </div>
+
+            <!-- Custom / New Label Input -->
+            <div class="flex space-x-2">
               <input 
                 type="text" 
-                id="inputDetailCategory" 
-                placeholder="e.g., Office Mobile, Meeting Notes, Project Spec" 
-                class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none" 
+                id="inputPointLabel" 
+                placeholder="Or type a brand new label..." 
+                class="flex-1 px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none" 
               />
+              <button 
+                type="button" 
+                onclick="saveCustomLabelGlobally()" 
+                class="px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition shadow-xs shrink-0 flex items-center space-x-1"
+                title="Add to library"
+              >
+                <i class="fa-solid fa-plus text-[10px]"></i>
+                <span>Save Label</span>
+              </button>
             </div>
-            
-            <!-- Quick preset pill tags -->
-            <div class="flex items-center space-x-1 overflow-x-auto pt-2 no-scrollbar text-[11px]">
-              <span class="text-slate-400 font-medium text-[10px] shrink-0 mr-1">Presets:</span>
-              <button type="button" onclick="applyPresetLabel('Direct Phone', 'phone')" class="px-2.5 py-0.5 rounded-full bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-800 shrink-0 border border-slate-200">Phone</button>
-              <button type="button" onclick="applyPresetLabel('Official Email', 'email')" class="px-2.5 py-0.5 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-800 shrink-0 border border-slate-200">Email</button>
-              <button type="button" onclick="applyPresetLabel('Site Photo', 'image')" class="px-2.5 py-0.5 rounded-full bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-800 shrink-0 border border-slate-200">Photo</button>
-              <button type="button" onclick="applyPresetLabel('Video Tour', 'video')" class="px-2.5 py-0.5 rounded-full bg-slate-100 hover:bg-purple-100 text-slate-700 hover:text-purple-800 shrink-0 border border-slate-200">Video</button>
-              <button type="button" onclick="applyPresetLabel('Voice Memo', 'voice')" class="px-2.5 py-0.5 rounded-full bg-slate-100 hover:bg-teal-100 text-slate-700 hover:text-teal-800 shrink-0 border border-slate-200">Voice</button>
-              <button type="button" onclick="applyPresetLabel('PDF Spec', 'pdf')" class="px-2.5 py-0.5 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-700 hover:text-rose-800 shrink-0 border border-slate-200">PDF</button>
+
+            <!-- Interactive Label Chips Pool -->
+            <div class="mt-2 pt-1">
+              <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block mb-1">Quick Select Label:</span>
+              <div id="modalLabelChipsContainer" class="flex flex-wrap gap-1 max-h-24 overflow-y-auto no-scrollbar pt-0.5">
+                <!-- Dynamically rendered -->
+              </div>
             </div>
           </div>
 
-          <!-- 2. TYPE SELECTOR -->
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Point Type</label>
-            <div class="grid grid-cols-4 gap-1.5 text-xs">
-              <button type="button" onclick="switchPointType('text')" id="btnType_text" class="type-picker-btn py-2 px-1 text-center rounded-xl border border-sky-500 bg-sky-50 text-sky-700 font-bold flex flex-col items-center">
-                <i class="fa-solid fa-align-left mb-1 text-sm"></i> Text Note
-              </button>
-              <button type="button" onclick="switchPointType('phone')" id="btnType_phone" class="type-picker-btn py-2 px-1 text-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-semibold flex flex-col items-center hover:bg-slate-100">
-                <i class="fa-solid fa-phone mb-1 text-sm text-emerald-600"></i> Phone
-              </button>
-              <button type="button" onclick="switchPointType('email')" id="btnType_email" class="type-picker-btn py-2 px-1 text-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-semibold flex flex-col items-center hover:bg-slate-100">
-                <i class="fa-solid fa-envelope mb-1 text-sm text-blue-600"></i> Email
-              </button>
-              <button type="button" onclick="switchPointType('media')" id="btnType_media" class="type-picker-btn py-2 px-1 text-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-semibold flex flex-col items-center hover:bg-slate-100">
-                <i class="fa-solid fa-photo-film mb-1 text-sm text-amber-600"></i> Media/File
-              </button>
-            </div>
-          </div>
-
-          <!-- 3. MAIN CONTENT / VALUE INPUT -->
-          <div>
-            <label id="detailValueLabel" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-              Point Content / Value *
+          <!-- 3. MAIN INPUT: TEXT MODE CONTENT -->
+          <div id="containerTextModeInput">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+              Text Content / Note / Details *
             </label>
             <textarea 
-              id="inputDetailValue" 
+              id="inputPointTextContent" 
               rows="3" 
-              placeholder="Enter your notes, description, or paste a link/number..." 
+              placeholder="Type description, phone number (+91...), email, address, or points..." 
               class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none"
             ></textarea>
+            <div class="mt-1 flex items-center space-x-2 text-[10px] text-slate-400">
+              <span><i class="fa-solid fa-magic mr-1 text-sky-500"></i> Auto-detects Phone & Email for 1-tap Call & WhatsApp</span>
+            </div>
           </div>
 
-          <!-- 4. ATTACH ANY MEDIA (Images, Videos, PDFs, Audio) -->
-          <div class="border border-slate-200 rounded-2xl p-3.5 bg-slate-50">
-            <div class="flex items-center justify-between mb-2">
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                <i class="fa-solid fa-paperclip text-slate-500 mr-1"></i> Attach Media or Document
+          <!-- 4. MAIN INPUT: MEDIA MODE (UPLOAD OR URL) -->
+          <div id="containerMediaModeInput" class="hidden space-y-3">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                Attach Media File (Photo, Video, PDF, Voice, Doc)
               </label>
-              <span class="text-[10px] text-slate-400">All media formats</span>
+              <div class="border-2 border-dashed border-sky-200 rounded-2xl p-4 bg-sky-50/50 text-center">
+                <input 
+                  type="file" 
+                  id="inputUniversalMediaFile" 
+                  onchange="handleMediaModeFileUpload(event)" 
+                  class="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-sky-600 file:text-white hover:file:bg-sky-700 cursor-pointer" 
+                />
+                <p class="text-[10px] text-slate-400 mt-1.5">Images (JPG, PNG), Videos (MP4), PDFs, Audio (MP3, WAV) & Docs</p>
+              </div>
             </div>
 
-            <input 
-              type="file" 
-              id="detailFileInput" 
-              onchange="processUniversalFileUpload(event)" 
-              class="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-sky-600 file:text-white hover:file:bg-sky-700 cursor-pointer" 
-            />
+            <!-- Optional Web URL Alternative -->
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                Or Paste Web Media Link (URL)
+              </label>
+              <input 
+                type="url" 
+                id="inputMediaUrl" 
+                placeholder="https://example.com/file.pdf or video url..." 
+                class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-1 focus:ring-sky-500 focus:outline-none" 
+              />
+            </div>
 
-            <!-- Preview Card for Attached File -->
-            <div id="mediaUploadPreviewContainer" class="hidden mt-3 p-2.5 bg-white border border-slate-200 rounded-xl flex items-center justify-between">
+            <!-- Optional Media Note / Caption -->
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                Media Caption / Notes (Optional)
+              </label>
+              <input 
+                type="text" 
+                id="inputMediaCaption" 
+                placeholder="Brief notes about this attachment..." 
+                class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-1 focus:ring-sky-500 focus:outline-none" 
+              />
+            </div>
+
+            <!-- Attached Media Preview Card -->
+            <div id="mediaModePreviewCard" class="hidden p-3 bg-white border border-slate-200 rounded-2xl flex items-center justify-between shadow-xs">
               <div class="flex items-center space-x-2.5 min-w-0">
-                <div id="mediaPreviewIcon" class="w-9 h-9 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-sm shrink-0 border border-sky-100">
+                <div id="mediaModePreviewIcon" class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-sm shrink-0 border border-sky-100">
                   <i class="fa-solid fa-file"></i>
                 </div>
                 <div class="min-w-0">
-                  <p id="mediaPreviewFileName" class="text-xs font-bold text-slate-800 truncate">file.pdf</p>
-                  <span id="mediaPreviewFileType" class="text-[10px] text-slate-400 uppercase">PDF</span>
+                  <p id="mediaModePreviewName" class="text-xs font-bold text-slate-800 truncate">document.pdf</p>
+                  <span id="mediaModePreviewType" class="text-[10px] text-slate-400 uppercase font-semibold">PDF File</span>
                 </div>
               </div>
-              <button type="button" onclick="clearStagedUpload()" class="p-1 text-slate-400 hover:text-rose-500 text-xs">
+              <button type="button" onclick="clearMediaModeUpload()" class="p-1.5 text-slate-400 hover:text-rose-500 text-xs">
                 <i class="fa-solid fa-trash-can"></i>
               </button>
             </div>
@@ -583,7 +621,9 @@
         </div>
 
         <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end space-x-2">
-          <button onclick="closeModal('modalDetailPoint')" class="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-xl transition">Cancel</button>
+          <button onclick="closeModal('modalDetailPoint')" class="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-xl transition">
+            Cancel
+          </button>
           <button onclick="saveDetailPoint()" class="px-5 py-2 text-xs sm:text-sm font-semibold bg-sky-600 text-white rounded-xl hover:bg-sky-700 transition shadow-xs flex items-center space-x-1.5">
             <i class="fa-solid fa-check text-xs"></i>
             <span>Add Point</span>
@@ -750,11 +790,29 @@
 
     const itemsCollection = db.collection("items");
     const inboxCollection = db.collection("inbox");
+    const configCollection = db.collection("app_config");
 
     // Local Storage Keys
-    const STORAGE_KEY_ITEMS = 'omnisync_items_v6';
-    const STORAGE_KEY_INBOX = 'omnisync_inbox_v6';
+    const STORAGE_KEY_ITEMS = 'omnisync_items_v7';
+    const STORAGE_KEY_INBOX = 'omnisync_inbox_v7';
+    const STORAGE_KEY_LABELS = 'omnisync_labels_v7';
     const STORAGE_KEY_ALLOWED_EMAIL = 'omnisync_allowed_email';
+
+    // Default Starting Global Labels Library
+    const DEFAULT_GLOBAL_LABELS = [
+      "Phone Number",
+      "Official Email",
+      "Site Photo",
+      "Video Tour",
+      "PDF Spec",
+      "Meeting Notes",
+      "Reference Note",
+      "Emergency Contact",
+      "Billing & Invoice"
+    ];
+
+    let globalLabels = [];
+    let activeLabelFilter = null; // Filter directory by specific custom label
 
     let allowedEmail = localStorage.getItem(STORAGE_KEY_ALLOWED_EMAIL) || "";
     document.getElementById('inputCustomAllowedEmail').value = allowedEmail;
@@ -815,17 +873,21 @@
     let currentTab = 'home';
     let currentOmniFilterType = 'all';
     let currentInboxType = 'note';
-    let stagedUploadedFile = null;
-    let stagedCreateModalPoints = [];
-    let activePointType = 'text';
+    let stagedMediaModeUpload = null;
+    let currentDetailMode = 'text'; // 'text' or 'media'
 
-    // Local Cache Read
+    // Load Local Cache
     try {
       const cached = localStorage.getItem(STORAGE_KEY_ITEMS);
       if (cached) items = JSON.parse(cached);
       const cachedInbox = localStorage.getItem(STORAGE_KEY_INBOX);
       if (cachedInbox) inboxItems = JSON.parse(cachedInbox);
-    } catch(e) {}
+      const cachedLabels = localStorage.getItem(STORAGE_KEY_LABELS);
+      if (cachedLabels) globalLabels = JSON.parse(cachedLabels);
+      else globalLabels = [...DEFAULT_GLOBAL_LABELS];
+    } catch(e) {
+      globalLabels = [...DEFAULT_GLOBAL_LABELS];
+    }
 
     // Real-Time Cloud Listeners
     function initFirestoreListeners() {
@@ -836,6 +898,7 @@
         });
         localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(items));
         enforceAllSidesMutualConsistency();
+        extractAndSyncLabelsFromItems();
         renderActiveView();
       }, (error) => {
         console.warn("Firestore sync notice:", error);
@@ -851,17 +914,29 @@
       }, (error) => {
         console.warn("Firestore inbox notice:", error);
       });
+
+      // Sync Global Labels Document
+      configCollection.doc("global_labels").onSnapshot((doc) => {
+        if (doc.exists && Array.isArray(doc.data().labels)) {
+          const incoming = doc.data().labels;
+          globalLabels = [...new Set([...globalLabels, ...incoming])];
+          localStorage.setItem(STORAGE_KEY_LABELS, JSON.stringify(globalLabels));
+          refreshLabelPickers();
+          renderDynamicLabelFilterBar();
+        }
+      }, () => {});
     }
 
     function saveData() {
       localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(items));
       localStorage.setItem(STORAGE_KEY_INBOX, JSON.stringify(inboxItems));
+      localStorage.setItem(STORAGE_KEY_LABELS, JSON.stringify(globalLabels));
     }
 
     function saveItemToCloud(item) {
       if (!item || !item.id) return;
       itemsCollection.doc(item.id).set(item, { merge: true }).catch(err => {
-        console.warn("Cloud write fallback to local storage:", err);
+        console.warn("Cloud write fallback:", err);
       });
     }
 
@@ -870,6 +945,30 @@
       itemsCollection.doc(itemId).delete().catch(err => {
         console.warn("Cloud delete error:", err);
       });
+    }
+
+    function syncGlobalLabelsToCloud() {
+      localStorage.setItem(STORAGE_KEY_LABELS, JSON.stringify(globalLabels));
+      configCollection.doc("global_labels").set({ labels: globalLabels }, { merge: true }).catch(() => {});
+    }
+
+    // Scan all items to make sure any label used in any detail point is part of globalLabels
+    function extractAndSyncLabelsFromItems() {
+      let changed = false;
+      items.forEach(it => {
+        (it.details || []).forEach(d => {
+          const l = (d.category || d.label || '').trim();
+          if (l && !globalLabels.includes(l)) {
+            globalLabels.push(l);
+            changed = true;
+          }
+        });
+      });
+      if (changed) {
+        syncGlobalLabelsToCloud();
+      }
+      refreshLabelPickers();
+      renderDynamicLabelFilterBar();
     }
 
     function renderActiveView() {
@@ -992,46 +1091,101 @@
       renderDirectoryList();
     }
 
-    // ==========================================
-    // REDESIGNED DETAIL POINT CREATOR LOGIC
-    // ==========================================
-    function switchPointType(type) {
-      activePointType = type;
-      document.querySelectorAll('.type-picker-btn').forEach(b => {
-        b.classList.remove('border-sky-500', 'bg-sky-50', 'text-sky-700', 'font-bold');
-        b.classList.add('border-slate-200', 'bg-slate-50', 'text-slate-600', 'font-semibold');
-      });
+    // =========================================================================
+    // REDESIGNED DETAIL POINT CREATOR ENGINE (Text Mode vs Media Mode + Labels)
+    // =========================================================================
+    function setDetailMode(mode) {
+      currentDetailMode = mode;
+      const btnText = document.getElementById('btnModeText');
+      const btnMedia = document.getElementById('btnModeMedia');
+      const textContainer = document.getElementById('containerTextModeInput');
+      const mediaContainer = document.getElementById('containerMediaModeInput');
+      const helper = document.getElementById('modeHelperText');
 
-      const activeBtn = document.getElementById(`btnType_${type}`);
-      if (activeBtn) {
-        activeBtn.classList.remove('border-slate-200', 'bg-slate-50', 'text-slate-600');
-        activeBtn.classList.add('border-sky-500', 'bg-sky-50', 'text-sky-700', 'font-bold');
-      }
+      if (mode === 'text') {
+        btnText.classList.add('bg-white', 'text-sky-700', 'border', 'border-sky-200', 'shadow-xs');
+        btnText.classList.remove('text-slate-600');
+        btnMedia.classList.remove('bg-white', 'text-sky-700', 'border', 'border-sky-200', 'shadow-xs');
+        btnMedia.classList.add('text-slate-600');
 
-      const valLabel = document.getElementById('detailValueLabel');
-      const valInput = document.getElementById('inputDetailValue');
-
-      if (type === 'phone') {
-        valLabel.textContent = "Phone Number (Actionable Call / WhatsApp) *";
-        valInput.placeholder = "+91 98765 43210";
-      } else if (type === 'email') {
-        valLabel.textContent = "Email Address (Click-to-Mail) *";
-        valInput.placeholder = "user@example.com";
-      } else if (type === 'media') {
-        valLabel.textContent = "Media Description / Caption / Web URL";
-        valInput.placeholder = "Caption, notes, or direct web media link...";
+        textContainer.classList.remove('hidden');
+        mediaContainer.classList.add('hidden');
+        helper.textContent = "Enter notes, description, phone numbers, or emails. Action buttons will be auto-generated.";
       } else {
-        valLabel.textContent = "Point Content / Text Note *";
-        valInput.placeholder = "Enter your notes, description, or paste any content...";
+        btnMedia.classList.add('bg-white', 'text-sky-700', 'border', 'border-sky-200', 'shadow-xs');
+        btnMedia.classList.remove('text-slate-600');
+        btnText.classList.remove('bg-white', 'text-sky-700', 'border', 'border-sky-200', 'shadow-xs');
+        btnText.classList.add('text-slate-600');
+
+        mediaContainer.classList.remove('hidden');
+        textContainer.classList.add('hidden');
+        helper.textContent = "Upload or link photos, videos, PDFs, voice recordings, or documents with instant preview.";
       }
     }
 
-    function applyPresetLabel(label, type) {
-      document.getElementById('inputDetailCategory').value = label;
-      if (type) switchPointType(type);
+    function refreshLabelPickers() {
+      // 1. Populate Modal Dropdown
+      const select = document.getElementById('selectGlobalLabel');
+      if (select) {
+        const currentVal = select.value;
+        let html = '<option value="">-- Choose from existing labels --</option>';
+        globalLabels.forEach(lbl => {
+          html += `<option value="${escapeHtml(lbl)}">${escapeHtml(lbl)}</option>`;
+        });
+        select.innerHTML = html;
+        if (currentVal) select.value = currentVal;
+      }
+
+      // 2. Populate Modal Chips
+      const chipsContainer = document.getElementById('modalLabelChipsContainer');
+      if (chipsContainer) {
+        let chipsHtml = '';
+        globalLabels.forEach(lbl => {
+          chipsHtml += `
+            <button 
+              type="button" 
+              onclick="applyGlobalLabelDirectly('${escapeHtml(lbl)}')" 
+              class="px-2 py-0.5 rounded-lg bg-slate-100 hover:bg-sky-100 text-slate-700 hover:text-sky-800 text-[11px] font-medium border border-slate-200 transition shrink-0"
+            >
+              ${escapeHtml(lbl)}
+            </button>
+          `;
+        });
+        chipsContainer.innerHTML = chipsHtml;
+      }
     }
 
-    function processUniversalFileUpload(event) {
+    function handleSelectExistingLabel(val) {
+      if (!val) return;
+      document.getElementById('inputPointLabel').value = val;
+    }
+
+    function applyGlobalLabelDirectly(val) {
+      document.getElementById('inputPointLabel').value = val;
+      const select = document.getElementById('selectGlobalLabel');
+      if (select) select.value = val;
+      showToast(`Selected label: "${val}"`);
+    }
+
+    function saveCustomLabelGlobally() {
+      const val = (document.getElementById('inputPointLabel').value || '').trim();
+      if (!val) {
+        showToast("Please enter a label name");
+        return;
+      }
+
+      if (!globalLabels.includes(val)) {
+        globalLabels.push(val);
+        syncGlobalLabelsToCloud();
+        refreshLabelPickers();
+        renderDynamicLabelFilterBar();
+        showToast(`Saved "${val}" to global library`);
+      } else {
+        showToast(`"${val}" already exists in library`);
+      }
+    }
+
+    function handleMediaModeFileUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
 
@@ -1043,22 +1197,18 @@
         if (file.type.startsWith('image/')) {
           detectedType = 'image';
           iconHtml = '<i class="fa-solid fa-image text-amber-500"></i>';
-          activePointType = 'media';
         } else if (file.type.startsWith('video/')) {
           detectedType = 'video';
           iconHtml = '<i class="fa-solid fa-video text-purple-500"></i>';
-          activePointType = 'media';
         } else if (file.type.startsWith('audio/')) {
           detectedType = 'voice';
           iconHtml = '<i class="fa-solid fa-microphone text-teal-500"></i>';
-          activePointType = 'media';
         } else if (file.type.includes('pdf')) {
           detectedType = 'pdf';
           iconHtml = '<i class="fa-solid fa-file-pdf text-rose-500"></i>';
-          activePointType = 'media';
         }
 
-        stagedUploadedFile = {
+        stagedMediaModeUpload = {
           name: file.name,
           size: file.size,
           mime: file.type,
@@ -1066,31 +1216,47 @@
           detectedType: detectedType
         };
 
-        // If category is empty, suggest filename or type
-        const catInput = document.getElementById('inputDetailCategory');
-        if (!catInput.value.trim()) {
-          catInput.value = file.name.split('.')[0];
+        // If label is empty, suggest based on file
+        const labelInput = document.getElementById('inputPointLabel');
+        if (!labelInput.value.trim()) {
+          const suggested = file.name.split('.')[0];
+          labelInput.value = suggested.length > 25 ? suggested.slice(0, 25) : suggested;
         }
 
-        // Show preview card
-        const previewBox = document.getElementById('mediaUploadPreviewContainer');
-        previewBox.classList.remove('hidden');
-        document.getElementById('mediaPreviewFileName').textContent = file.name;
-        document.getElementById('mediaPreviewFileType').textContent = detectedType;
-        document.getElementById('mediaPreviewIcon').innerHTML = iconHtml;
+        const previewCard = document.getElementById('mediaModePreviewCard');
+        previewCard.classList.remove('hidden');
+        document.getElementById('mediaModePreviewName').textContent = file.name;
+        document.getElementById('mediaModePreviewType').textContent = detectedType + ' file';
+        document.getElementById('mediaModePreviewIcon').innerHTML = iconHtml;
 
         showToast(`Loaded "${file.name}"`);
       };
       reader.readAsDataURL(file);
     }
 
-    function clearStagedUpload() {
-      stagedUploadedFile = null;
-      document.getElementById('detailFileInput').value = '';
-      document.getElementById('mediaUploadPreviewContainer').classList.add('hidden');
+    function clearMediaModeUpload() {
+      stagedMediaModeUpload = null;
+      document.getElementById('inputUniversalMediaFile').value = '';
+      document.getElementById('mediaModePreviewCard').classList.add('hidden');
     }
 
-    // FIXED & ROBUST SAVE DETAIL POINT
+    // Auto-detect phone and email in text content
+    function detectTextSubtype(str) {
+      if (!str) return 'text';
+      const trimmed = str.trim();
+      // Email regex
+      if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+        return 'email';
+      }
+      // Phone regex: contains mostly digits, +, spaces, min 6 digits
+      const digits = trimmed.replace(/[^0-9]/g, '');
+      if (digits.length >= 7 && /^[\d\s+\-().]{7,25}$/.test(trimmed)) {
+        return 'phone';
+      }
+      return 'text';
+    }
+
+    // SAVING REDESIGNED DETAIL POINT
     function saveDetailPoint() {
       const currentItem = items.find(it => it.id === currentActiveItemId);
       if (!currentItem) {
@@ -1098,24 +1264,49 @@
         return;
       }
 
-      const label = (document.getElementById('inputDetailCategory').value || '').trim() || 'General Point';
-      const rawValue = (document.getElementById('inputDetailValue').value || '').trim();
+      const label = (document.getElementById('inputPointLabel').value || '').trim() || 'General';
 
-      // Ensure there is either text content or an uploaded file
-      if (!rawValue && !stagedUploadedFile) {
-        showToast("Please enter text or attach a file");
-        document.getElementById('inputDetailValue').focus();
-        return;
+      // Auto add label to global library if not present
+      if (!globalLabels.includes(label)) {
+        globalLabels.push(label);
+        syncGlobalLabelsToCloud();
+        refreshLabelPickers();
+        renderDynamicLabelFilterBar();
       }
 
-      let pointType = activePointType;
-      let finalValue = rawValue;
-      let fileName = undefined;
+      let pointType = 'text';
+      let pointValue = '';
+      let pointNotes = '';
+      let pointFileName = undefined;
 
-      if (stagedUploadedFile) {
-        finalValue = stagedUploadedFile.dataUrl;
-        fileName = stagedUploadedFile.name;
-        pointType = stagedUploadedFile.detectedType;
+      if (currentDetailMode === 'text') {
+        pointValue = (document.getElementById('inputPointTextContent').value || '').trim();
+        if (!pointValue) {
+          showToast("Please enter text content for this point");
+          document.getElementById('inputPointTextContent').focus();
+          return;
+        }
+        pointType = detectTextSubtype(pointValue);
+      } else {
+        // Media mode
+        const urlInput = (document.getElementById('inputMediaUrl').value || '').trim();
+        pointNotes = (document.getElementById('inputMediaCaption').value || '').trim();
+
+        if (stagedMediaModeUpload) {
+          pointValue = stagedMediaModeUpload.dataUrl;
+          pointFileName = stagedMediaModeUpload.name;
+          pointType = stagedMediaModeUpload.detectedType;
+        } else if (urlInput) {
+          pointValue = urlInput;
+          pointFileName = urlInput.split('/').pop().split('?')[0] || "Online Media";
+          if (urlInput.endsWith('.mp4') || urlInput.endsWith('.webm')) pointType = 'video';
+          else if (urlInput.endsWith('.pdf')) pointType = 'pdf';
+          else if (urlInput.match(/\.(jpeg|jpg|gif|png|webp)/i)) pointType = 'image';
+          else pointType = 'media';
+        } else {
+          showToast("Please attach a file or provide a web URL");
+          return;
+        }
       }
 
       if (!currentItem.details) {
@@ -1125,100 +1316,85 @@
       const newPoint = {
         id: 'pt_' + Date.now().toString(36),
         category: label,
+        label: label,
         type: pointType,
-        value: finalValue,
-        notes: stagedUploadedFile ? rawValue : '',
-        fileName: fileName,
+        value: pointValue,
+        notes: pointNotes,
+        fileName: pointFileName,
         createdAt: new Date().toLocaleDateString()
       };
 
       currentItem.details.push(newPoint);
 
-      // Save both to local and cloud immediately
+      // Save locally and in Cloud
       saveItemToCloud(currentItem);
       saveData();
 
-      // Reset and close
-      clearStagedUpload();
-      document.getElementById('inputDetailValue').value = '';
-      document.getElementById('inputDetailCategory').value = '';
-      switchPointType('text');
+      // Clean inputs
+      clearMediaModeUpload();
+      document.getElementById('inputPointTextContent').value = '';
+      document.getElementById('inputMediaUrl').value = '';
+      document.getElementById('inputMediaCaption').value = '';
+      document.getElementById('inputPointLabel').value = '';
+      document.getElementById('selectGlobalLabel').value = '';
+      setDetailMode('text');
       closeModal('modalDetailPoint');
 
       renderDetailView();
-      showToast(`Added point "${label}"`);
+      showToast(`Added point labeled "${label}"`);
     }
 
-    // QUICK PRESETS INSIDE 'CREATE NEW ITEM' MODAL
-    function presetModalAddPoint(type) {
-      let promptTitle = "Phone Number";
-      let placeholder = "+91 98765 43210";
-      if (type === 'email') { promptTitle = "Email Address"; placeholder = "name@company.com"; }
-      else if (type === 'image') { promptTitle = "Image URL or Caption"; placeholder = "https://... or photo note"; }
-      else if (type === 'video') { promptTitle = "Video Link / Tour"; placeholder = "https://... video url"; }
-      else if (type === 'voice') { promptTitle = "Voice Memo Note"; placeholder = "Audio summary or recording note"; }
-      else if (type === 'pdf') { promptTitle = "PDF / Document"; placeholder = "Document spec title or link"; }
+    // =========================================================
+    // DYNAMIC FILTER BY LABEL BAR (HOME SCREEN)
+    // =========================================================
+    function renderDynamicLabelFilterBar() {
+      const container = document.getElementById('dynamicLabelFilterContainer');
+      if (!container) return;
 
-      const tempId = 'staged_' + Date.now().toString(36);
-      stagedCreateModalPoints.push({
-        tempId: tempId,
-        category: promptTitle,
-        type: type,
-        value: placeholder
-      });
-      renderModalStagedPoints();
-    }
+      let html = `
+        <button 
+          onclick="setLabelFilter(null)" 
+          class="px-2 py-0.5 rounded-full text-[10px] font-bold transition shrink-0 ${activeLabelFilter === null ? 'bg-sky-600 text-white shadow-2xs' : 'bg-slate-200/80 text-slate-600 hover:bg-slate-300'}"
+        >
+          All Labels
+        </button>
+      `;
 
-    function renderModalStagedPoints() {
-      const container = document.getElementById('modalStagedPointsList');
-      if (stagedCreateModalPoints.length === 0) {
-        container.innerHTML = '';
-        return;
-      }
-
-      let html = '';
-      stagedCreateModalPoints.forEach((pt, index) => {
+      globalLabels.forEach(lbl => {
+        const isSelected = activeLabelFilter === lbl;
         html += `
-          <div class="bg-white p-2 rounded-xl border border-sky-200 flex items-center space-x-2 text-xs">
-            <span class="w-6 h-6 rounded-lg bg-sky-50 text-sky-700 flex items-center justify-center text-[10px] font-bold">
-              #${index + 1}
-            </span>
-            <input 
-              type="text" 
-              value="${escapeHtml(pt.category)}" 
-              onchange="updateStagedPointCategory('${pt.tempId}', this.value)" 
-              placeholder="Label" 
-              class="w-24 px-2 py-1 border border-slate-200 rounded-lg text-xs font-bold" 
-            />
-            <input 
-              type="text" 
-              value="${escapeHtml(pt.value)}" 
-              onchange="updateStagedPointValue('${pt.tempId}', this.value)" 
-              placeholder="Enter value / number..." 
-              class="flex-1 px-2 py-1 border border-slate-200 rounded-lg text-xs" 
-            />
-            <button type="button" onclick="removeStagedPoint('${pt.tempId}')" class="text-slate-400 hover:text-rose-500 p-1">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-          </div>
+          <button 
+            onclick="setLabelFilter('${escapeHtml(lbl)}')" 
+            class="px-2 py-0.5 rounded-full text-[10px] font-bold transition shrink-0 ${isSelected ? 'bg-sky-600 text-white shadow-2xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}"
+          >
+            ${escapeHtml(lbl)}
+          </button>
         `;
       });
+
       container.innerHTML = html;
     }
 
-    function updateStagedPointCategory(tempId, val) {
-      const p = stagedCreateModalPoints.find(x => x.tempId === tempId);
-      if (p) p.category = val;
+    function setLabelFilter(lbl) {
+      if (activeLabelFilter === lbl) {
+        activeLabelFilter = null; // Toggle off
+      } else {
+        activeLabelFilter = lbl;
+      }
+      renderDynamicLabelFilterBar();
+      renderDirectoryList();
+      if (activeLabelFilter) {
+        showToast(`Filtered by label: "${activeLabelFilter}"`);
+      }
     }
 
-    function updateStagedPointValue(tempId, val) {
-      const p = stagedCreateModalPoints.find(x => x.tempId === tempId);
-      if (p) p.value = val;
-    }
-
-    function removeStagedPoint(tempId) {
-      stagedCreateModalPoints = stagedCreateModalPoints.filter(x => x.tempId !== tempId);
-      renderModalStagedPoints();
+    function filterByLabelDirectly(lbl) {
+      activeLabelFilter = lbl;
+      switchMainTab('home');
+      renderDynamicLabelFilterBar();
+      renderDirectoryList();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      showToast(`Showing items with label: "${lbl}"`);
     }
 
     // Modal Create / Edit Item Handlers
@@ -1228,8 +1404,6 @@
       document.getElementById('inputItemDesc').value = '';
       document.getElementById('inputQuickNewConnectedItem').value = '';
       document.getElementById('modalItemHeaderTitle').textContent = 'Create New Item';
-      stagedCreateModalPoints = [];
-      renderModalStagedPoints();
       populateLinkSelector([]);
       openModal('modalItem');
     }
@@ -1286,20 +1460,13 @@
         }
       } else {
         const newId = 'item_' + Date.now().toString(36);
-        const compiledDetails = stagedCreateModalPoints.map((pt, i) => ({
-          id: 'pt_' + Date.now().toString(36) + '_' + i,
-          category: pt.category || 'General',
-          type: pt.type || 'text',
-          value: pt.value || ''
-        }));
-
         const newItem = {
           id: newId,
           title: title,
           description: descInput.value.trim(),
           createdAt: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }),
           linkedItemIds: [],
-          details: compiledDetails
+          details: []
         };
 
         items.push(newItem);
@@ -1323,8 +1490,6 @@
       document.getElementById('inputItemDesc').value = item.description || '';
       document.getElementById('inputQuickNewConnectedItem').value = '';
       document.getElementById('modalItemHeaderTitle').textContent = 'Edit Item & Connections';
-      stagedCreateModalPoints = [];
-      renderModalStagedPoints();
       populateLinkSelector(item.linkedItemIds || []);
       openModal('modalItem');
     });
@@ -1357,10 +1522,14 @@
 
     // Detail Point Modal Trigger
     document.getElementById('btnOpenAddDetailModal').addEventListener('click', () => {
-      document.getElementById('inputDetailCategory').value = '';
-      document.getElementById('inputDetailValue').value = '';
-      clearStagedUpload();
-      switchPointType('text');
+      document.getElementById('inputPointLabel').value = '';
+      document.getElementById('inputPointTextContent').value = '';
+      document.getElementById('inputMediaUrl').value = '';
+      document.getElementById('inputMediaCaption').value = '';
+      document.getElementById('selectGlobalLabel').value = '';
+      clearMediaModeUpload();
+      setDetailMode('text');
+      refreshLabelPickers();
       openModal('modalDetailPoint');
     });
 
@@ -1384,7 +1553,7 @@
       const query = (document.getElementById('directoryOmniSearchInput').value || '').trim().toLowerCase();
       const clearBtn = document.getElementById('clearSearchBtn');
 
-      if (query) clearBtn.classList.remove('hidden');
+      if (query || activeLabelFilter) clearBtn.classList.remove('hidden');
       else clearBtn.classList.add('hidden');
 
       if (currentOmniFilterType === 'phone') {
@@ -1412,11 +1581,12 @@
         const phoneList = [];
         items.forEach(item => {
           (item.details || []).forEach(pt => {
-            if (pt.type === 'phone' || (pt.category && pt.category.toLowerCase().includes('phone'))) {
+            const isPhone = pt.type === 'phone' || (pt.category && pt.category.toLowerCase().includes('phone')) || (pt.label && pt.label.toLowerCase().includes('phone'));
+            if (isPhone) {
               phoneList.push({
                 itemId: item.id,
                 itemTitle: item.title,
-                category: pt.category || 'Direct Phone',
+                category: pt.label || pt.category || 'Direct Phone',
                 number: pt.value,
                 notes: pt.notes || ''
               });
@@ -1425,8 +1595,11 @@
         });
 
         let filteredPhones = phoneList;
+        if (activeLabelFilter) {
+          filteredPhones = filteredPhones.filter(p => p.category.toLowerCase() === activeLabelFilter.toLowerCase());
+        }
         if (query) {
-          filteredPhones = phoneList.filter(p => 
+          filteredPhones = filteredPhones.filter(p => 
             p.itemTitle.toLowerCase().includes(query) ||
             p.number.toLowerCase().includes(query) ||
             p.category.toLowerCase().includes(query)
@@ -1439,7 +1612,7 @@
           container.innerHTML = '';
           emptyState.classList.remove('hidden');
           document.getElementById('emptyTitle').textContent = "No Phone Numbers Found";
-          document.getElementById('emptySub').textContent = "Add a phone detail point into any item or adjust search.";
+          document.getElementById('emptySub').textContent = "Add a phone detail point into any item or adjust filters.";
           return;
         }
         emptyState.classList.add('hidden');
@@ -1458,8 +1631,8 @@
                   <div class="mt-1 flex items-baseline space-x-2">
                     <span class="text-base sm:text-lg font-bold font-mono tracking-tight text-slate-900">${escapeHtml(p.number)}</span>
                   </div>
-                  <span class="inline-block text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md mt-1">
-                    ${escapeHtml(p.category)}
+                  <span onclick="filterByLabelDirectly('${escapeHtml(p.category)}')" class="cursor-pointer inline-block text-[10px] font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded-md mt-1 transition">
+                    <i class="fa-solid fa-tag text-[9px] mr-1"></i>${escapeHtml(p.category)}
                   </span>
                 </div>
                 <div class="flex items-center space-x-1.5 shrink-0 pt-0.5">
@@ -1487,11 +1660,12 @@
         const emailList = [];
         items.forEach(item => {
           (item.details || []).forEach(pt => {
-            if (pt.type === 'email' || (pt.category && pt.category.toLowerCase().includes('email'))) {
+            const isEmail = pt.type === 'email' || (pt.category && pt.category.toLowerCase().includes('email')) || (pt.label && pt.label.toLowerCase().includes('email'));
+            if (isEmail) {
               emailList.push({
                 itemId: item.id,
                 itemTitle: item.title,
-                category: pt.category || 'Official Email',
+                category: pt.label || pt.category || 'Official Email',
                 email: pt.value
               });
             }
@@ -1499,8 +1673,11 @@
         });
 
         let filteredEmails = emailList;
+        if (activeLabelFilter) {
+          filteredEmails = filteredEmails.filter(e => e.category.toLowerCase() === activeLabelFilter.toLowerCase());
+        }
         if (query) {
-          filteredEmails = emailList.filter(e => 
+          filteredEmails = filteredEmails.filter(e => 
             e.itemTitle.toLowerCase().includes(query) ||
             e.email.toLowerCase().includes(query) ||
             e.category.toLowerCase().includes(query)
@@ -1531,8 +1708,8 @@
                   <div class="mt-1">
                     <span class="text-sm sm:text-base font-bold text-blue-900 break-all">${escapeHtml(e.email)}</span>
                   </div>
-                  <span class="inline-block text-[10px] font-semibold text-blue-800 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md mt-1">
-                    ${escapeHtml(e.category)}
+                  <span onclick="filterByLabelDirectly('${escapeHtml(e.category)}')" class="cursor-pointer inline-block text-[10px] font-semibold text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-md mt-1 transition">
+                    <i class="fa-solid fa-tag text-[9px] mr-1"></i>${escapeHtml(e.category)}
                   </span>
                 </div>
                 <div class="flex items-center space-x-1.5 shrink-0 pt-0.5">
@@ -1561,7 +1738,7 @@
               docList.push({
                 itemId: item.id,
                 itemTitle: item.title,
-                category: pt.category || 'PDF Document',
+                category: pt.label || pt.category || 'PDF Document',
                 fileName: pt.fileName || pt.value,
                 url: pt.value
               });
@@ -1570,8 +1747,11 @@
         });
 
         let filteredDocs = docList;
+        if (activeLabelFilter) {
+          filteredDocs = filteredDocs.filter(d => d.category.toLowerCase() === activeLabelFilter.toLowerCase());
+        }
         if (query) {
-          filteredDocs = docList.filter(d => 
+          filteredDocs = filteredDocs.filter(d => 
             d.itemTitle.toLowerCase().includes(query) ||
             d.fileName.toLowerCase().includes(query) ||
             d.category.toLowerCase().includes(query)
@@ -1602,7 +1782,9 @@
                     Item: ${escapeHtml(d.itemTitle)}
                   </span>
                   <h4 class="text-xs sm:text-sm font-bold text-slate-800 truncate">${escapeHtml(d.fileName)}</h4>
-                  <span class="text-[10px] text-rose-700 font-semibold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100">${escapeHtml(d.category)}</span>
+                  <span onclick="filterByLabelDirectly('${escapeHtml(d.category)}')" class="cursor-pointer text-[10px] text-rose-700 font-semibold bg-rose-50 hover:bg-rose-100 px-1.5 py-0.5 rounded border border-rose-100 transition">
+                    <i class="fa-solid fa-tag text-[9px] mr-1"></i>${escapeHtml(d.category)}
+                  </span>
                 </div>
               </div>
               <a href="${escapeHtml(d.url)}" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shrink-0 shadow-xs flex items-center space-x-1.5 transition">
@@ -1621,12 +1803,12 @@
         const mediaList = [];
         items.forEach(item => {
           (item.details || []).forEach(pt => {
-            if (pt.type === 'image' || pt.type === 'video') {
+            if (pt.type === 'image' || pt.type === 'video' || pt.type === 'voice') {
               mediaList.push({
                 itemId: item.id,
                 itemTitle: item.title,
                 type: pt.type,
-                category: pt.category || 'Media',
+                category: pt.label || pt.category || 'Media',
                 url: pt.value
               });
             }
@@ -1634,8 +1816,11 @@
         });
 
         let filteredMedia = mediaList;
+        if (activeLabelFilter) {
+          filteredMedia = filteredMedia.filter(m => m.category.toLowerCase() === activeLabelFilter.toLowerCase());
+        }
         if (query) {
-          filteredMedia = mediaList.filter(m => 
+          filteredMedia = filteredMedia.filter(m => 
             m.itemTitle.toLowerCase().includes(query) ||
             m.category.toLowerCase().includes(query)
           );
@@ -1659,10 +1844,13 @@
               <div class="relative bg-black flex items-center justify-center min-h-[140px] max-h-48 overflow-hidden">
                 ${m.type === 'image' 
                   ? `<img src="${escapeHtml(m.url)}" alt="Media preview" class="w-full h-40 object-cover" onerror="this.src='https://placehold.co/400x250/f1f5f9/64748b?text=Image+Unavailable'" />`
-                  : `<video controls class="w-full h-40 object-cover bg-black"><source src="${escapeHtml(m.url)}" type="video/mp4" /></video>`
+                  : (m.type === 'video'
+                    ? `<video controls class="w-full h-40 object-cover bg-black"><source src="${escapeHtml(m.url)}" type="video/mp4" /></video>`
+                    : `<div class="p-6 text-center text-white"><i class="fa-solid fa-microphone text-3xl mb-1 text-teal-400"></i><p class="text-xs">Audio Recording</p></div>`
+                  )
                 }
                 <span class="absolute top-2 left-2 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-black/70 text-white backdrop-blur">
-                  ${m.type === 'image' ? '<i class="fa-solid fa-camera mr-1"></i>Image' : '<i class="fa-solid fa-video mr-1"></i>Video'}
+                  ${m.type === 'image' ? '<i class="fa-solid fa-camera mr-1"></i>Image' : (m.type === 'video' ? '<i class="fa-solid fa-video mr-1"></i>Video' : '<i class="fa-solid fa-microphone mr-1"></i>Voice')}
                 </span>
               </div>
               <div class="p-3 flex-1 flex flex-col justify-between">
@@ -1670,7 +1858,9 @@
                   <span onclick="openItemDetail('${m.itemId}')" class="cursor-pointer text-[10px] font-bold text-sky-700 hover:underline block truncate">
                     ${escapeHtml(m.itemTitle)}
                   </span>
-                  <span class="text-xs font-semibold text-slate-800">${escapeHtml(m.category)}</span>
+                  <span onclick="filterByLabelDirectly('${escapeHtml(m.category)}')" class="cursor-pointer text-xs font-semibold text-slate-800 hover:text-sky-600">
+                    <i class="fa-solid fa-tag text-[9px] text-amber-500 mr-1"></i>${escapeHtml(m.category)}
+                  </span>
                 </div>
                 <div class="pt-2 mt-2 border-t border-slate-100 flex items-center justify-between">
                   <button onclick="openItemDetail('${m.itemId}')" class="text-[11px] font-semibold text-slate-500 hover:text-sky-600 transition">
@@ -1749,6 +1939,17 @@
       // DEFAULT CONTACT BOOK VIEW (A-Z)
       let filtered = [...items];
 
+      // Filter by Active Label if selected
+      if (activeLabelFilter) {
+        filtered = filtered.filter(item => {
+          return (item.details || []).some(pt => {
+            const l = (pt.label || pt.category || '').toLowerCase();
+            return l === activeLabelFilter.toLowerCase();
+          });
+        });
+      }
+
+      // Filter by Omni-Search Query
       if (query) {
         filtered = filtered.filter(item => {
           const titleMatch = item.title && item.title.toLowerCase().includes(query);
@@ -1756,7 +1957,7 @@
           const dateMatch = item.createdAt && item.createdAt.toLowerCase().includes(query);
           
           const detailsMatch = (item.details || []).some(pt => {
-            const cat = pt.category && pt.category.toLowerCase().includes(query);
+            const cat = (pt.category || pt.label || '').toLowerCase().includes(query);
             const val = pt.value && pt.value.toLowerCase().includes(query);
             const fn = pt.fileName && pt.fileName.toLowerCase().includes(query);
             const notes = pt.notes && pt.notes.toLowerCase().includes(query);
@@ -1772,13 +1973,13 @@
         });
       }
 
-      counterBadge.textContent = `${items.length} ${items.length === 1 ? 'Item' : 'Items'}`;
+      counterBadge.textContent = `${filtered.length} ${filtered.length === 1 ? 'Item' : 'Items'}`;
 
       if (filtered.length === 0) {
         container.innerHTML = '';
         emptyState.classList.remove('hidden');
         document.getElementById('emptyTitle').textContent = "No Items Found";
-        document.getElementById('emptySub').textContent = "Tap the center Star icon to create an item or clear search.";
+        document.getElementById('emptySub').textContent = activeLabelFilter ? `No items matched label "${activeLabelFilter}".` : "Tap the center Star icon to create an item or clear search.";
         return;
       }
       emptyState.classList.add('hidden');
@@ -1815,6 +2016,9 @@
         const hasMedia = (item.details || []).some(d => d.type === 'image' || d.type === 'video');
         const hasPdf = (item.details || []).some(d => d.type === 'pdf');
 
+        // Extract label pills for this item
+        const itemLabels = [...new Set((item.details || []).map(d => d.label || d.category).filter(Boolean))];
+
         html += `
           <div onclick="openItemDetail('${item.id}')" class="group bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 hover:border-sky-400 hover:shadow-md transition cursor-pointer flex items-center justify-between">
             <div class="flex items-center space-x-3.5 min-w-0">
@@ -1833,10 +2037,18 @@
                     <i class="fa-solid fa-list mr-1 text-[9px] text-sky-500"></i> ${detailsCount} Points
                   </span>
 
+                  <!-- Quick Media Indicators -->
                   ${hasPhone ? '<span class="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100"><i class="fa-solid fa-phone"></i></span>' : ''}
                   ${hasEmail ? '<span class="text-[10px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100"><i class="fa-solid fa-envelope"></i></span>' : ''}
                   ${hasPdf ? '<span class="text-[10px] text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100"><i class="fa-solid fa-file-pdf"></i></span>' : ''}
                   ${hasMedia ? '<span class="text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100"><i class="fa-solid fa-photo-film"></i></span>' : ''}
+
+                  <!-- Labels Preview -->
+                  ${itemLabels.slice(0, 2).map(l => `
+                    <span onclick="event.stopPropagation(); filterByLabelDirectly('${escapeHtml(l)}')" class="text-[9px] font-bold text-slate-600 bg-slate-100 hover:bg-sky-100 hover:text-sky-800 px-1.5 py-0.5 rounded-md border border-slate-200 transition">
+                      #${escapeHtml(l)}
+                    </span>
+                  `).join('')}
                 </div>
               </div>
             </div>
@@ -1905,7 +2117,7 @@
         pointsContainer.innerHTML = `
           <div class="text-center py-8 bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-4">
             <p class="text-xs text-slate-500 font-semibold">No detail points added yet.</p>
-            <p class="text-[11px] text-slate-400 mt-1">Click "Add Point" to add text notes, phone numbers, emails, photos, videos, or PDFs.</p>
+            <p class="text-[11px] text-slate-400 mt-1">Click "Add Point" to add text notes, contacts, media or documents with custom labels.</p>
           </div>
         `;
         return;
@@ -1914,7 +2126,7 @@
       let pointsHtml = '';
       points.forEach((point, index) => {
         let badgeColor = "bg-slate-100 text-slate-700 border-slate-200";
-        let icon = "fa-circle-dot";
+        let icon = "fa-tag";
 
         if (point.type === 'phone') {
           badgeColor = "bg-emerald-50 text-emerald-700 border-emerald-200";
@@ -1936,6 +2148,8 @@
           icon = "fa-microphone";
         }
 
+        const pointLabel = point.label || point.category || "General";
+
         let bodyContent = '';
         if (point.type === 'phone') {
           const clean = (point.value || '').replace(/[^0-9+]/g, '');
@@ -1946,6 +2160,7 @@
               </a>
               <div class="flex space-x-1.5">
                 <a href="tel:${clean}" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold rounded-lg shadow-2xs">Call</a>
+                <a href="https://wa.me/${clean.replace('+', '')}" target="_blank" class="px-2 py-1 bg-teal-600 hover:bg-teal-700 text-white text-[11px] font-semibold rounded-lg shadow-2xs">WhatsApp</a>
                 <button onclick="copyToClipboard('${escapeHtml(point.value)}', 'Phone')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold rounded-lg">Copy</button>
               </div>
             </div>
@@ -2007,8 +2222,8 @@
           <div class="p-3.5 bg-white border border-slate-200 rounded-2xl shadow-xs hover:border-slate-300 transition">
             <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-slate-100">
               <div class="flex items-center space-x-2">
-                <span class="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${badgeColor}">
-                  <i class="fa-solid ${icon} mr-1 text-[9px]"></i> ${escapeHtml(point.category || "General")}
+                <span onclick="filterByLabelDirectly('${escapeHtml(pointLabel)}')" class="cursor-pointer inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${badgeColor} hover:opacity-80 transition" title="Filter directory by this label">
+                  <i class="fa-solid ${icon} mr-1 text-[9px]"></i> ${escapeHtml(pointLabel)}
                 </span>
                 <span class="text-[10px] text-slate-400 font-mono">#${index + 1}</span>
               </div>
@@ -2257,6 +2472,7 @@
           {
             id: 'pt_1',
             category: 'Initial Capture',
+            label: 'Initial Capture',
             type: inboxObj.type === 'voice' ? 'voice' : (inboxObj.type === 'image' ? 'image' : 'text'),
             value: inboxObj.fileUrl || inboxObj.content
           }
@@ -2285,6 +2501,7 @@
       targetItem.details.push({
         id: 'pt_' + Date.now().toString(36),
         category: categoryName,
+        label: categoryName,
         type: inboxObj.type === 'image' ? 'image' : (inboxObj.type === 'voice' ? 'voice' : 'text'),
         value: inboxObj.fileUrl || inboxObj.content
       });
@@ -2300,7 +2517,8 @@
       const dataPayload = {
         exportedAt: new Date().toISOString(),
         items: items,
-        inbox: inboxItems
+        inbox: inboxItems,
+        labels: globalLabels
       };
       const jsonStr = JSON.stringify(dataPayload, null, 2);
       const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -2327,6 +2545,10 @@
             parsed.items.forEach(it => saveItemToCloud(it));
             if (Array.isArray(parsed.inbox)) {
               parsed.inbox.forEach(ib => inboxCollection.doc(ib.id).set(ib));
+            }
+            if (Array.isArray(parsed.labels)) {
+              globalLabels = [...new Set([...globalLabels, ...parsed.labels])];
+              syncGlobalLabelsToCloud();
             }
             showToast("Database imported & synced to cloud!");
             closeModal('modalSyncBackup');
@@ -2426,6 +2648,7 @@
         viewHome.classList.remove('hidden');
         tabRight.classList.remove('text-slate-500');
         tabRight.classList.add('text-sky-600');
+        renderDynamicLabelFilterBar();
         renderDirectoryList();
       } else if (tab === 'detail') {
         viewDetail.classList.remove('hidden');
@@ -2447,9 +2670,11 @@
     function clearOmniSearch() {
       const searchInput = document.getElementById('directoryOmniSearchInput');
       searchInput.value = '';
+      activeLabelFilter = null;
       document.getElementById('clearSearchBtn').classList.add('hidden');
       currentOmniFilterType = 'all';
       updateFilterChipsUI();
+      renderDynamicLabelFilterBar();
       renderDirectoryList();
     }
 
@@ -2497,6 +2722,8 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       startClock();
+      refreshLabelPickers();
+      renderDynamicLabelFilterBar();
       renderDirectoryList();
     });
   </script>
