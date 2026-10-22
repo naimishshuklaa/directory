@@ -1,0 +1,2285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>OmniSync Personal Directory</title>
+
+  <!-- PWA & Mobile Meta Tags -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0284c7" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="OmniSync" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230284c7'%3E%3Cpath d='M12 2L2 12L12 22L22 12L12 2Z'/%3E%3C/svg%3E" />
+
+  <!-- Firebase SDKs (Compat versions for single-file deployment) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome 6 for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.02);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.25);
+      border-radius: 999px;
+    }
+    .pb-safe {
+      padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex justify-center selection:bg-sky-500 selection:text-white">
+
+  <!-- ========================================== -->
+  <!-- AUTH LOCK SCREEN (Private Access Guard)    -->
+  <!-- ========================================== -->
+  <div id="auth-lock-screen" class="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-md flex flex-col items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-2xl max-w-sm w-full text-center border border-slate-200">
+      <div class="w-16 h-16 bg-gradient-to-tr from-sky-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl mx-auto mb-4 shadow-lg shadow-sky-500/30">
+        <i class="fa-solid fa-lock"></i>
+      </div>
+      <h2 class="text-xl font-bold text-slate-900 mb-1">OmniSync Directory</h2>
+      <p class="text-xs text-slate-500 mb-5">Single-user protected access. Sign in with your authorized Google account to sync live across devices.</p>
+      
+      <button onclick="loginWithGoogle()" class="w-full flex items-center justify-center space-x-2.5 py-3 px-4 bg-sky-600 hover:bg-sky-700 active:scale-95 text-white rounded-xl font-semibold text-sm transition shadow-md shadow-sky-500/20">
+        <i class="fa-brands fa-google text-base"></i>
+        <span>Sign in with Google</span>
+      </button>
+
+      <div class="mt-4 pt-3 border-t border-slate-100 text-left">
+        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Target Owner Email</label>
+        <div class="flex items-center space-x-1.5">
+          <input type="email" id="inputCustomAllowedEmail" placeholder="your-email@gmail.com" class="flex-1 text-xs border border-slate-300 rounded-lg p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none" />
+          <button onclick="saveAllowedEmail()" class="px-2.5 py-2 bg-slate-800 text-white text-xs font-semibold rounded-lg hover:bg-slate-900 transition">Save</button>
+        </div>
+        <p class="text-[10px] text-slate-400 mt-1">Set your email once or change it whenever required.</p>
+      </div>
+      
+      <p id="auth-error" class="text-rose-600 text-xs font-medium mt-3 hidden bg-rose-50 p-2 rounded-lg border border-rose-200"></p>
+    </div>
+  </div>
+
+  <!-- Main Device Shell -->
+  <div id="appContainer" class="w-full max-w-md md:max-w-xl lg:max-w-2xl bg-white shadow-2xl min-h-screen flex flex-col relative border-x border-slate-200">
+    
+    <!-- TOP HEADER: LIVE DATE, TIME & STATUS -->
+    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 px-4 sm:px-5 py-3 flex items-center justify-between shadow-xs select-none">
+      <div class="flex items-center space-x-2">
+        <span id="cloudStatusDot" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" title="Cloud Synced"></span>
+        <div id="headerDate" class="text-xs sm:text-sm font-semibold tracking-wide text-slate-700 uppercase">
+          --/--/----
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <div id="headerTime" class="text-xs sm:text-sm font-mono font-bold tracking-wider text-slate-900 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+          00:00:00 AM
+        </div>
+        <!-- Sync & Profile Modal Trigger -->
+        <button onclick="openModal('modalSyncBackup')" class="p-1.5 text-slate-500 hover:text-sky-600 rounded-lg hover:bg-slate-100 text-sm transition" title="Sync / Profile / Settings">
+          <i class="fa-solid fa-arrows-rotate"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Animated Toast -->
+    <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 opacity-0 pointer-events-none transform -translate-y-2 bg-slate-900 text-white text-xs sm:text-sm px-4 py-2 rounded-full shadow-xl flex items-center space-x-2 border border-slate-700">
+      <i class="fa-solid fa-circle-check text-emerald-400"></i>
+      <span id="toastMsg">Action completed</span>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="modalConfirm" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
+      <div class="bg-white rounded-2xl max-w-xs w-full p-5 text-center shadow-2xl">
+        <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3 text-lg">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h4 id="confirmModalTitle" class="text-sm font-bold text-slate-900 mb-1">Confirm Action</h4>
+        <p id="confirmModalDesc" class="text-xs text-slate-500 mb-4">Are you sure you want to proceed?</p>
+        <div class="flex space-x-2">
+          <button onclick="closeModal('modalConfirm')" class="flex-1 py-2 text-xs font-semibold rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Cancel</button>
+          <button id="btnConfirmProceed" class="flex-1 py-2 text-xs font-semibold rounded-xl bg-rose-600 text-white hover:bg-rose-700 transition">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT VIEW AREA -->
+    <main class="flex-1 overflow-y-auto pb-safe">
+
+      <!-- SCREEN 1: DEFAULT HOME (Directory & Direct Extraction Rosters) -->
+      <section id="viewHome" class="p-4 sm:p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h1 id="directoryViewTitle" class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Contact Book Directory</h1>
+            <p id="directoryViewSubtitle" class="text-xs text-slate-500 font-medium">All items, media points & multi-way links</p>
+          </div>
+          <span id="itemsCounterBadge" class="bg-sky-50 text-sky-700 text-xs font-semibold px-2.5 py-1 rounded-full border border-sky-200 shrink-0">
+            0 Items
+          </span>
+        </div>
+
+        <!-- INTEGRATED OMNI-SEARCH & FILTER BAR -->
+        <div class="mb-4 bg-slate-50/80 p-3 rounded-2xl border border-slate-200 shadow-xs">
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+            <input 
+              type="text" 
+              id="directoryOmniSearchInput" 
+              placeholder="Search anything: names, phone, email, pdfs, media..." 
+              class="w-full pl-10 pr-9 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition shadow-2xs"
+            />
+            <button id="clearSearchBtn" onclick="clearOmniSearch()" class="hidden absolute right-3 top-3 text-slate-400 hover:text-slate-600 text-sm">
+              <i class="fa-solid fa-circle-xmark"></i>
+            </button>
+          </div>
+
+          <!-- DIRECT EXTRACTION FILTER CHIPS -->
+          <div class="flex space-x-1.5 overflow-x-auto pt-2.5 text-xs font-medium no-scrollbar">
+            <button onclick="setOmniFilterType('all')" class="omni-filter-chip px-3 py-1 rounded-full bg-slate-900 text-white shrink-0 transition" data-filter="all">
+              All Items
+            </button>
+            <button onclick="setOmniFilterType('phone')" class="omni-filter-chip px-3 py-1 rounded-full bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 shrink-0 transition" data-filter="phone">
+              <i class="fa-solid fa-phone mr-1 text-[10px] text-emerald-600"></i>Phonebook
+            </button>
+            <button onclick="setOmniFilterType('email')" class="omni-filter-chip px-3 py-1 rounded-full bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 shrink-0 transition" data-filter="email">
+              <i class="fa-solid fa-envelope mr-1 text-[10px] text-blue-600"></i>Email Directory
+            </button>
+            <button onclick="setOmniFilterType('pdf')" class="omni-filter-chip px-3 py-1 rounded-full bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 shrink-0 transition" data-filter="pdf">
+              <i class="fa-solid fa-file-pdf mr-1 text-[10px] text-rose-600"></i>PDFs & Docs
+            </button>
+            <button onclick="setOmniFilterType('media')" class="omni-filter-chip px-3 py-1 rounded-full bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 shrink-0 transition" data-filter="media">
+              <i class="fa-solid fa-photo-film mr-1 text-[10px] text-amber-600"></i>Photos & Videos
+            </button>
+            <button onclick="setOmniFilterType('connected')" class="omni-filter-chip px-3 py-1 rounded-full bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 shrink-0 transition" data-filter="connected">
+              <i class="fa-solid fa-circle-nodes mr-1 text-[10px] text-indigo-600"></i>Relationship Graph
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Results Container -->
+        <div id="itemsListContainer" class="space-y-3"></div>
+
+        <!-- Empty State -->
+        <div id="emptyItemsState" class="hidden text-center py-12 px-4">
+          <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-2xl">
+            <i class="fa-regular fa-address-book"></i>
+          </div>
+          <h3 id="emptyTitle" class="text-sm font-semibold text-slate-700">No Records Found</h3>
+          <p id="emptySub" class="text-xs text-slate-500 mt-1 max-w-xs mx-auto">Try clearing search or switch filters back to 'All Items'.</p>
+        </div>
+      </section>
+
+      <!-- SCREEN 2: ITEM DETAIL VIEW -->
+      <section id="viewDetail" class="hidden p-4 sm:p-5">
+        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-200">
+          <button onclick="switchMainTab('home')" class="inline-flex items-center text-xs font-semibold text-slate-600 hover:text-sky-600 transition px-2 py-1.5 rounded-lg hover:bg-slate-100">
+            <i class="fa-solid fa-arrow-left mr-1.5"></i> Back to Directory
+          </button>
+          <div class="flex items-center space-x-1.5">
+            <button id="btnEditItem" class="px-2.5 py-1.5 text-slate-600 hover:text-sky-600 hover:bg-slate-100 rounded-lg text-xs font-medium transition">
+              <i class="fa-solid fa-pen mr-1"></i> Edit
+            </button>
+            <button id="btnDeleteItem" class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg text-xs transition">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Item Header Card -->
+        <div class="bg-gradient-to-br from-sky-50 via-white to-slate-50 p-4 sm:p-5 rounded-2xl border border-sky-100 mb-5 shadow-xs">
+          <div>
+            <span class="inline-block text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-sky-600 text-white mb-2">Item Record</span>
+            <h2 id="detailTitle" class="text-xl sm:text-2xl font-bold text-slate-900 leading-snug">Item Title</h2>
+            <p id="detailDescription" class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">Description goes here...</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-sky-100 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+            <span>Created: <span id="detailDate">Today</span></span>
+            <span>ID: <span id="detailId">#000</span></span>
+          </div>
+        </div>
+
+        <!-- Mutual Connected Items -->
+        <div class="mb-6 bg-slate-50/70 p-4 rounded-2xl border border-slate-200">
+          <div class="flex items-center justify-between mb-2.5">
+            <div>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center">
+                <i class="fa-solid fa-diagram-project mr-1.5 text-indigo-600"></i> Connected Items (Mutual / All-Sides)
+              </h3>
+              <p class="text-[10px] text-slate-400 mt-0.5">Connected items automatically link back to this item</p>
+            </div>
+            <button id="btnOpenConnectModal" class="inline-flex items-center text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-lg hover:bg-indigo-100 transition shadow-2xs">
+              <i class="fa-solid fa-link mr-1"></i> Manage Links
+            </button>
+          </div>
+          <div id="detailLinkedItemsList" class="flex flex-wrap gap-2 pt-1"></div>
+        </div>
+
+        <!-- Categorized Details & Points -->
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center">
+                <i class="fa-solid fa-list-check mr-1.5 text-sky-600"></i> Details & Media Points
+              </h3>
+              <p class="text-[10px] text-slate-400 mt-0.5">Phone, email, docs, images, videos & notes</p>
+            </div>
+            <button id="btnOpenAddDetailModal" class="inline-flex items-center text-xs font-medium bg-slate-900 text-white px-3 py-1.5 rounded-xl hover:bg-slate-800 transition shadow-xs">
+              <i class="fa-solid fa-plus mr-1"></i> Add Point
+            </button>
+          </div>
+          <div id="detailPointsContainer" class="space-y-3"></div>
+        </div>
+      </section>
+
+      <!-- SCREEN 3: LEFT TAB - QUICK ADD INBOX -->
+      <section id="viewInbox" class="hidden p-4 sm:p-5">
+        <div class="mb-4">
+          <div class="flex items-center space-x-2">
+            <svg class="w-5 h-5 text-sky-600" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L2 12L12 22L22 12L12 2Z" />
+            </svg>
+            <h1 class="text-xl font-bold text-slate-900">Quick Media Inbox</h1>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">Temporary inbox for raw media, quick notes, and files before organizing.</p>
+        </div>
+
+        <!-- Quick Capture Form Card -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs mb-5">
+          <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Capture Anything Now</h4>
+          
+          <div class="grid grid-cols-4 gap-2 mb-3">
+            <button onclick="setInboxType('note')" id="inboxTypeNote" class="inbox-type-btn py-2 px-1 text-xs rounded-xl border border-sky-500 bg-sky-50 text-sky-700 font-medium flex flex-col items-center">
+              <i class="fa-solid fa-pen-nib mb-1 text-sm"></i> Note
+            </button>
+            <button onclick="setInboxType('image')" id="inboxTypeImage" class="inbox-type-btn py-2 px-1 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-medium flex flex-col items-center hover:bg-slate-100">
+              <i class="fa-solid fa-camera mb-1 text-sm"></i> Image
+            </button>
+            <button onclick="setInboxType('voice')" id="inboxTypeVoice" class="inbox-type-btn py-2 px-1 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-medium flex flex-col items-center hover:bg-slate-100">
+              <i class="fa-solid fa-microphone mb-1 text-sm"></i> Voice
+            </button>
+            <button onclick="setInboxType('file')" id="inboxTypeFile" class="inbox-type-btn py-2 px-1 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-medium flex flex-col items-center hover:bg-slate-100">
+              <i class="fa-solid fa-paperclip mb-1 text-sm"></i> File/PDF
+            </button>
+          </div>
+
+          <div class="space-y-2">
+            <textarea id="inboxRawInput" rows="2" placeholder="Jot down a quick thought, link, or phone number..." class="w-full text-xs sm:text-sm p-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"></textarea>
+
+            <div id="inboxFileUploadRow" class="hidden border-2 border-dashed border-slate-200 rounded-xl p-3 text-center bg-slate-50">
+              <input type="file" id="inboxFileInput" class="text-xs file:mr-2 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-sky-100 file:text-sky-700 hover:file:bg-sky-200" />
+              <p class="text-[10px] text-slate-400 mt-1">Photos, Videos, Audio, PDFs & Documents</p>
+            </div>
+
+            <div id="inboxVoiceRow" class="hidden flex items-center justify-between bg-amber-50 border border-amber-200 p-2.5 rounded-xl">
+              <span id="voiceStatus" class="text-xs text-amber-800 font-medium">Ready to record memo</span>
+              <button id="btnRecordVoice" class="bg-amber-600 text-white text-xs px-3 py-1.5 rounded-lg font-semibold hover:bg-amber-700 transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-circle text-[9px] text-red-300 animate-pulse"></i>
+                <span>Simulate Record (3s)</span>
+              </button>
+            </div>
+          </div>
+
+          <button id="btnSaveToInbox" class="w-full mt-3 bg-slate-900 text-white text-xs sm:text-sm font-semibold py-2.5 rounded-xl hover:bg-slate-800 transition shadow-xs">
+            Drop into Inbox
+          </button>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Unsorted Items (<span id="inboxCount">0</span>)</h3>
+            <span class="text-[10px] text-slate-400">Temporary storage until assigned</span>
+          </div>
+          <div id="inboxListContainer" class="space-y-2.5"></div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- BOTTOM NAVIGATION TABS -->
+    <nav class="fixed md:absolute bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-300 py-2.5 px-6 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] flex items-center justify-around">
+
+      <!-- LEFT TAB: DIAMOND (Quick Add) -->
+      <button id="navTabLeft" onclick="switchMainTab('inbox')" class="group flex flex-col items-center justify-center p-1 text-slate-500 hover:text-sky-600 transition focus:outline-none">
+        <div class="w-11 h-11 flex items-center justify-center rounded-xl group-hover:bg-sky-50 transition">
+          <svg class="w-7 h-7 transform rotate-45 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="4" width="16" height="16" rx="2" />
+          </svg>
+        </div>
+        <span class="text-[10px] font-bold tracking-tight uppercase mt-0.5 text-slate-600 group-hover:text-sky-600">Quick Add</span>
+      </button>
+
+      <!-- CENTER TAB: 4-POINT STAR (Add Structured Item) -->
+      <button id="navTabCenter" onclick="openCreateItemModal()" class="group flex flex-col items-center justify-center -mt-5 p-1 focus:outline-none">
+        <div class="w-14 h-14 bg-gradient-to-tr from-sky-600 to-sky-400 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-sky-500/30 ring-4 ring-white group-hover:scale-105 active:scale-95 transition-all">
+          <svg class="w-8 h-8 transition-transform group-hover:rotate-12" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 1L14.7 9.3L23 12L14.7 14.7L12 23L9.3 14.7L1 12L9.3 9.3L12 1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <span class="text-[10px] font-bold tracking-tight uppercase mt-1 text-sky-700">Add Item</span>
+      </button>
+
+      <!-- RIGHT TAB: HEXAGON (Home) -->
+      <button id="navTabRight" onclick="goToHomeDefault()" class="group flex flex-col items-center justify-center p-1 text-sky-600 transition focus:outline-none">
+        <div class="w-11 h-11 flex items-center justify-center rounded-xl group-hover:bg-sky-50 transition">
+          <svg class="w-7 h-7 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12,2 21,7.5 21,17.5 12,23 3,17.5 3,7.5" />
+          </svg>
+        </div>
+        <span class="text-[10px] font-bold tracking-tight uppercase mt-0.5 text-sky-700">Home</span>
+      </button>
+
+    </nav>
+
+    <!-- MODAL 1: CREATE OR EDIT ITEM -->
+    <div id="modalItem" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
+      <div class="bg-white rounded-3xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+        <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+          <div>
+            <h3 id="modalItemHeaderTitle" class="text-base sm:text-lg font-bold text-slate-900">Create New Item</h3>
+            <p class="text-xs text-slate-500">Define the item, description, and connected items</p>
+          </div>
+          <button onclick="closeModal('modalItem')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 text-sm">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="p-5 overflow-y-auto space-y-4">
+          <input type="hidden" id="editItemId" value="" />
+          
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Item Title / Name *</label>
+            <input type="text" id="inputItemTitle" placeholder="e.g., Item A - Project Phoenix" class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">General Description</label>
+            <textarea id="inputItemDesc" rows="2" placeholder="Summary or overview of this item..." class="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none"></textarea>
+          </div>
+
+          <!-- CONNECTED ITEMS WITH ON-THE-FLY CREATION -->
+          <div class="border border-slate-200 rounded-2xl p-3.5 bg-slate-50/70">
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                Connected Items (Mutual Linking)
+              </label>
+              <span class="text-[10px] text-indigo-600 font-semibold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">All-Sides Sync</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mb-2.5">
+              Select existing items OR type a brand new item name below to create and link immediately:
+            </p>
+
+            <div class="flex space-x-2 mb-3">
+              <input 
+                type="text" 
+                id="inputQuickNewConnectedItem" 
+                placeholder="Type new item name (e.g. Item E - Legal)..." 
+                class="flex-1 px-3 py-2 text-xs border border-indigo-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+              />
+              <button 
+                type="button" 
+                onclick="quickCreateAndLinkNewItem('modal')" 
+                class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center space-x-1 shrink-0"
+              >
+                <i class="fa-solid fa-plus text-[10px]"></i>
+                <span>Add & Link</span>
+              </button>
+            </div>
+
+            <div id="linkSelectorContainer" class="max-h-36 overflow-y-auto border border-slate-200 rounded-xl p-2 space-y-1 bg-white"></div>
+          </div>
+        </div>
+
+        <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end space-x-2">
+          <button onclick="closeModal('modalItem')" class="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-xl transition">
+            Cancel
+          </button>
+          <button id="btnSaveItemSubmit" onclick="saveItemRecord()" class="px-5 py-2 text-xs sm:text-sm font-semibold bg-sky-600 text-white rounded-xl hover:bg-sky-700 transition shadow-xs">
+            Save Item
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 2: ADD CATEGORIZED DETAIL POINT -->
+    <div id="modalDetailPoint" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
+      <div class="bg-white rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+        <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Add Detail Point</h3>
+            <p class="text-xs text-slate-500">Pick a category and media/input type</p>
+          </div>
+          <button onclick="closeModal('modalDetailPoint')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 text-sm">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="p-5 overflow-y-auto space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Category Label</label>
+            <div class="flex space-x-2">
+              <input type="text" id="inputDetailCategory" placeholder="e.g., Contact, Specs, Billing, Site Inspection" class="flex-1 px-3 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none" />
+              <select id="quickCategorySelect" onchange="applyQuickCategory(this.value)" class="text-xs border border-slate-200 rounded-xl px-2 bg-slate-50">
+                <option value="">Presets</option>
+                <option value="Phone Number">Phone Number</option>
+                <option value="Official Email">Official Email</option>
+                <option value="PDF Document">PDF Document</option>
+                <option value="Site Photo">Site Photo</option>
+                <option value="Video Tour">Video Tour</option>
+                <option value="Voice Memo">Voice Memo</option>
+                <option value="Reference Note">Reference Note</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Input Type</label>
+            <select id="inputDetailType" onchange="handleDetailTypeChange(this.value)" class="w-full px-3 py-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none bg-white">
+              <option value="text">Plain Text / Note</option>
+              <option value="phone">Phone Number (Direct Actionable)</option>
+              <option value="email">Email Address (Direct Actionable)</option>
+              <option value="image">Image (URL or Local File)</option>
+              <option value="video">Video (URL or MP4/WebM)</option>
+              <option value="pdf">PDF / Document File</option>
+              <option value="voice">Audio / Voice Note</option>
+            </select>
+          </div>
+
+          <div id="detailValueContainer">
+            <label id="detailValueLabel" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Detail Content / Value</label>
+            <textarea id="inputDetailValue" rows="2" placeholder="Enter content, number, or URL..." class="w-full px-3 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none"></textarea>
+          </div>
+
+          <div id="detailFileHelper" class="hidden border border-dashed border-slate-300 p-2.5 rounded-xl bg-slate-50 text-center">
+            <input type="file" id="detailFileInput" onchange="processDetailFileUpload(event)" class="text-xs file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:bg-sky-100 file:text-sky-700" />
+            <p class="text-[10px] text-slate-400 mt-1">Files are securely encoded for live cloud syncing</p>
+          </div>
+        </div>
+
+        <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end space-x-2">
+          <button onclick="closeModal('modalDetailPoint')" class="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-xl">Cancel</button>
+          <button onclick="saveDetailPoint()" class="px-5 py-2 text-xs sm:text-sm font-semibold bg-sky-600 text-white rounded-xl hover:bg-sky-700 transition shadow-xs">Add Point</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 3: DIRECT MANAGE CONNECTIONS -->
+    <div id="modalManageConnections" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
+      <div class="bg-white rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+        <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Manage Mutual Connections</h3>
+            <p class="text-xs text-slate-500">Links are bi-directional across all sides</p>
+          </div>
+          <button onclick="closeModal('modalManageConnections')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 text-sm">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="p-5 overflow-y-auto space-y-4">
+          <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-3.5">
+            <label class="block text-xs font-bold text-indigo-900 uppercase tracking-wider mb-1">
+              Add Non-Existing Item & Link
+            </label>
+            <p class="text-[11px] text-indigo-700 mb-2">
+              Creates a brand new item in the database and immediately connects both sides:
+            </p>
+            <div class="flex space-x-2">
+              <input 
+                type="text" 
+                id="inputQuickNewItemInDetail" 
+                placeholder="e.g. Item X - Supplier..." 
+                class="flex-1 px-3 py-2 text-xs border border-indigo-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+              />
+              <button 
+                type="button" 
+                onclick="quickCreateAndLinkNewItem('detail')" 
+                class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition shadow-xs shrink-0"
+              >
+                + Create & Link
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+              Connect with Existing Items
+            </label>
+            <div id="directConnectionCheckboxContainer" class="max-h-56 overflow-y-auto border border-slate-200 rounded-xl p-2 space-y-1 bg-slate-50"></div>
+          </div>
+        </div>
+
+        <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end space-x-2">
+          <button onclick="closeModal('modalManageConnections')" class="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-xl">Cancel</button>
+          <button onclick="saveDirectConnections()" class="px-5 py-2 text-xs sm:text-sm font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition shadow-xs">Save Connections</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 4: CONVERT INBOX ITEM -->
+    <div id="modalConvertInbox" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
+      <div class="bg-white rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+        <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+          <h3 class="text-base font-bold text-slate-900">Organize Unsorted Media</h3>
+          <button onclick="closeModal('modalConvertInbox')" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-sm">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="p-5 space-y-4">
+          <input type="hidden" id="convertInboxId" />
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700" id="convertInboxPreview"></div>
+
+          <div class="space-y-2">
+            <button onclick="convertInboxToNewItem()" class="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs sm:text-sm rounded-xl transition flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-folder-plus"></i>
+              <span>Create As Brand New Item</span>
+            </button>
+            <div class="text-center text-[11px] text-slate-400 font-bold uppercase">— OR —</div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Attach to an Existing Item</label>
+              <select id="convertSelectTargetItem" class="w-full text-xs p-2.5 border border-slate-200 rounded-xl bg-white mb-2"></select>
+              <input type="text" id="convertCategoryName" placeholder="Category tag (e.g. Media, Inspection)" class="w-full text-xs p-2 border border-slate-200 rounded-xl mb-2" />
+              <button onclick="attachInboxToExistingItem()" class="w-full py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-xl transition">
+                Attach as Detail Point
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 5: SYNC & PROFILE SETTINGS -->
+    <div id="modalSyncBackup" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
+      <div class="bg-white rounded-3xl w-full max-w-md flex flex-col overflow-hidden shadow-2xl">
+        <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Sync & Account</h3>
+            <p class="text-xs text-slate-500">Live status across PC, Laptop & Phone</p>
+          </div>
+          <button onclick="closeModal('modalSyncBackup')" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-sm">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="p-5 space-y-4">
+          <!-- Active User Card -->
+          <div class="bg-sky-50 border border-sky-100 p-3.5 rounded-2xl flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 rounded-full bg-sky-600 text-white flex items-center justify-center font-bold text-sm">
+                <i class="fa-solid fa-user-check"></i>
+              </div>
+              <div>
+                <p id="authActiveUserEmail" class="text-xs font-bold text-sky-900 truncate max-w-[190px]">Connecting...</p>
+                <span class="text-[10px] text-emerald-600 font-semibold flex items-center">
+                  <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1"></span> Live Cloud Synced
+                </span>
+              </div>
+            </div>
+            <button onclick="logoutGoogle()" class="text-xs text-rose-600 hover:text-rose-800 font-bold bg-white px-2.5 py-1.5 rounded-xl border border-rose-200">
+              Sign Out
+            </button>
+          </div>
+
+          <!-- JSON Export/Import Backup -->
+          <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+            <h4 class="text-xs font-bold text-slate-800 uppercase mb-1">Local JSON File Backup</h4>
+            <p class="text-[11px] text-slate-500 mb-2.5">Manual snapshot backup of all items and links.</p>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="exportDatabaseJSON()" class="py-2 px-3 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1">
+                <i class="fa-solid fa-download"></i>
+                <span>Export</span>
+              </button>
+              <label class="py-2 px-3 bg-white border border-slate-300 hover:bg-slate-100 text-slate-800 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1 cursor-pointer">
+                <i class="fa-solid fa-upload"></i>
+                <span>Import</span>
+                <input type="file" id="importJsonFileInput" accept=".json" onchange="importDatabaseJSON(event)" class="hidden" />
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- JAVASCRIPT LOGIC & FIREBASE REAL-TIME ENGINE              -->
+  <!-- ========================================================= -->
+  <script>
+    // 1. Firebase Configuration Credentials
+    const firebaseConfig = {
+      apiKey: "AIzaSyBVLAvU_kONaEIN9EBLFcayn1ykOxQYWEk",
+      authDomain: "my-omni-app-2e0c9.firebaseapp.com",
+      databaseURL: "https://my-omni-app-2e0c9-default-rtdb.firebaseio.com",
+      projectId: "my-omni-app-2e0c9",
+      storageBucket: "my-omni-app-2e0c9.firebasestorage.app",
+      messagingSenderId: "862817215160",
+      appId: "1:862817215160:web:aa9c6265369a97dfd44a4d"
+    };
+
+    // 2. Initialize Firebase FIRST before calling auth or firestore
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    // Firestore Collections
+    const itemsCollection = db.collection("items");
+    const inboxCollection = db.collection("inbox");
+
+    // Local Storage Keys (Fallback & Offline Support)
+    const STORAGE_KEY_ITEMS = 'omnisync_items_cloud_cache';
+    const STORAGE_KEY_INBOX = 'omnisync_inbox_cloud_cache';
+    const STORAGE_KEY_ALLOWED_EMAIL = 'omnisync_allowed_email';
+
+    // Owner Email Guard
+    let allowedEmail = localStorage.getItem(STORAGE_KEY_ALLOWED_EMAIL) || "";
+    document.getElementById('inputCustomAllowedEmail').value = allowedEmail;
+
+    function saveAllowedEmail() {
+      const email = document.getElementById('inputCustomAllowedEmail').value.trim();
+      if (!email) {
+        showToast("Enter a valid email address");
+        return;
+      }
+      localStorage.setItem(STORAGE_KEY_ALLOWED_EMAIL, email);
+      allowedEmail = email;
+      showToast("Target email saved: " + email);
+    }
+
+    // Auth State Monitor
+    auth.onAuthStateChanged((user) => {
+      const lockScreen = document.getElementById("auth-lock-screen");
+      const authError = document.getElementById("auth-error");
+
+      if (user) {
+        // If allowedEmail is empty, adopt the first logged-in user as owner
+        if (!allowedEmail) {
+          allowedEmail = user.email;
+          localStorage.setItem(STORAGE_KEY_ALLOWED_EMAIL, allowedEmail);
+          document.getElementById('inputCustomAllowedEmail').value = allowedEmail;
+        }
+
+        if (user.email.toLowerCase() === allowedEmail.toLowerCase()) {
+          lockScreen.classList.add("hidden");
+          document.getElementById("authActiveUserEmail").textContent = user.email;
+          initFirestoreListeners();
+        } else {
+          authError.textContent = `Access denied. "${user.email}" does not match allowed owner (${allowedEmail}).`;
+          authError.classList.remove("hidden");
+          auth.signOut();
+        }
+      } else {
+        lockScreen.classList.remove("hidden");
+        document.getElementById("authActiveUserEmail").textContent = "Not signed in";
+      }
+    });
+
+    function loginWithGoogle() {
+      auth.signInWithPopup(provider).catch((error) => {
+        const authError = document.getElementById("auth-error");
+        authError.textContent = "Sign-in error: " + error.message;
+        authError.classList.remove("hidden");
+      });
+    }
+
+    function logoutGoogle() {
+      auth.signOut().then(() => {
+        closeModal('modalSyncBackup');
+        showToast("Signed out");
+      });
+    }
+
+    // State Variables
+    let items = [];
+    let inboxItems = [];
+    let currentActiveItemId = null;
+    let currentTab = 'home';
+    let currentOmniFilterType = 'all';
+    let currentInboxType = 'note';
+    let stagedUploadedFile = null;
+
+    // Load initial local cache for instant zero-latency UI
+    try {
+      const cached = localStorage.getItem(STORAGE_KEY_ITEMS);
+      if (cached) items = JSON.parse(cached);
+      const cachedInbox = localStorage.getItem(STORAGE_KEY_INBOX);
+      if (cachedInbox) inboxItems = JSON.parse(cachedInbox);
+    } catch(e) {}
+
+    // REAL-TIME FIRESTORE SYNC: PC, Laptop & Phone live WebSockets
+    function initFirestoreListeners() {
+      // 1. Items Listener
+      itemsCollection.onSnapshot((snapshot) => {
+        items = [];
+        snapshot.forEach((doc) => {
+          items.push({ id: doc.id, ...doc.data() });
+        });
+        localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(items));
+        enforceAllSidesMutualConsistency();
+        renderActiveView();
+      }, (error) => {
+        console.warn("Firestore items sync warning:", error);
+      });
+
+      // 2. Inbox Listener
+      inboxCollection.orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+        inboxItems = [];
+        snapshot.forEach((doc) => {
+          inboxItems.push({ id: doc.id, ...doc.data() });
+        });
+        localStorage.setItem(STORAGE_KEY_INBOX, JSON.stringify(inboxItems));
+        if (currentTab === 'inbox') renderInboxList();
+      }, (error) => {
+        console.warn("Firestore inbox sync warning:", error);
+      });
+    }
+
+    // Save Data across Cloud Firestore & Local Cache
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(items));
+      localStorage.setItem(STORAGE_KEY_INBOX, JSON.stringify(inboxItems));
+    }
+
+    function saveItemToCloud(item) {
+      if (!item || !item.id) return;
+      itemsCollection.doc(item.id).set(item, { merge: true }).catch(err => {
+        console.warn("Cloud write fallback to local:", err);
+      });
+    }
+
+    function deleteItemFromCloud(itemId) {
+      if (!itemId) return;
+      itemsCollection.doc(itemId).delete().catch(err => {
+        console.warn("Cloud delete error:", err);
+      });
+    }
+
+    // Helper: Dynamic View Switcher
+    function renderActiveView() {
+      if (currentTab === 'home') {
+        renderDirectoryList();
+      } else if (currentTab === 'detail') {
+        renderDetailView();
+      } else if (currentTab === 'inbox') {
+        renderInboxList();
+      }
+    }
+
+    // Mutual "All-Sides" Graph Consistency
+    function enforceAllSidesMutualConsistency() {
+      items.forEach(source => {
+        if (!source.linkedItemIds) source.linkedItemIds = [];
+        source.linkedItemIds.forEach(targetId => {
+          const target = items.find(it => it.id === targetId);
+          if (target) {
+            if (!target.linkedItemIds) target.linkedItemIds = [];
+            if (!target.linkedItemIds.includes(source.id)) {
+              target.linkedItemIds.push(source.id);
+            }
+          }
+        });
+      });
+    }
+
+    function linkItemsMutually(id1, id2) {
+      if (id1 === id2) return;
+      const item1 = items.find(it => it.id === id1);
+      const item2 = items.find(it => it.id === id2);
+      if (!item1 || !item2) return;
+
+      if (!item1.linkedItemIds) item1.linkedItemIds = [];
+      if (!item2.linkedItemIds) item2.linkedItemIds = [];
+
+      if (!item1.linkedItemIds.includes(id2)) item1.linkedItemIds.push(id2);
+      if (!item2.linkedItemIds.includes(id1)) item2.linkedItemIds.push(id1);
+
+      saveItemToCloud(item1);
+      saveItemToCloud(item2);
+      saveData();
+    }
+
+    function unlinkItemsMutually(id1, id2) {
+      const item1 = items.find(it => it.id === id1);
+      const item2 = items.find(it => it.id === id2);
+
+      if (item1 && item1.linkedItemIds) {
+        item1.linkedItemIds = item1.linkedItemIds.filter(id => id !== id2);
+        saveItemToCloud(item1);
+      }
+      if (item2 && item2.linkedItemIds) {
+        item2.linkedItemIds = item2.linkedItemIds.filter(id => id !== id1);
+        saveItemToCloud(item2);
+      }
+      saveData();
+    }
+
+    function setMutualLinksForSource(sourceId, targetIdsList) {
+      const source = items.find(it => it.id === sourceId);
+      if (!source) return;
+
+      const previousTargets = source.linkedItemIds || [];
+
+      previousTargets.forEach(oldTargetId => {
+        if (!targetIdsList.includes(oldTargetId)) {
+          unlinkItemsMutually(sourceId, oldTargetId);
+        }
+      });
+
+      targetIdsList.forEach(newTargetId => {
+        linkItemsMutually(sourceId, newTargetId);
+      });
+
+      source.linkedItemIds = [...new Set(targetIdsList)];
+      saveItemToCloud(source);
+      saveData();
+    }
+
+    // Quick Add Non-Existing Item
+    function quickCreateAndLinkNewItem(context) {
+      let inputEl = context === 'modal' ? document.getElementById('inputQuickNewConnectedItem') : document.getElementById('inputQuickNewItemInDetail');
+      const rawTitle = (inputEl.value || '').trim();
+      if (!rawTitle) {
+        showToast("Enter a name for the new item");
+        inputEl.focus();
+        return;
+      }
+
+      const newId = 'item_' + Date.now().toString(36);
+      const newItem = {
+        id: newId,
+        title: rawTitle,
+        description: `Created & linked via connection manager on ${new Date().toLocaleDateString()}`,
+        createdAt: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }),
+        linkedItemIds: [],
+        details: []
+      };
+
+      items.push(newItem);
+      saveItemToCloud(newItem);
+
+      if (context === 'detail' && currentActiveItemId) {
+        linkItemsMutually(currentActiveItemId, newId);
+        renderDetailView();
+        populateDirectConnectionCheckboxes();
+        showToast(`Created "${rawTitle}" & linked both ways!`);
+      } else if (context === 'modal') {
+        const currentModalId = document.getElementById('editItemId').value;
+        if (currentModalId) {
+          linkItemsMutually(currentModalId, newId);
+        }
+        const checkedValues = [];
+        document.querySelectorAll('.link-item-checkbox:checked').forEach(cb => checkedValues.push(cb.value));
+        checkedValues.push(newId);
+        populateLinkSelector(checkedValues);
+        showToast(`Created "${rawTitle}" & checked for linking!`);
+      }
+
+      inputEl.value = '';
+      saveData();
+      renderDirectoryList();
+    }
+
+    // Live Clock
+    function startClock() {
+      const dateEl = document.getElementById('headerDate');
+      const timeEl = document.getElementById('headerTime');
+      function update() {
+        const now = new Date();
+        const dateOptions = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+        dateEl.textContent = now.toLocaleDateString(undefined, dateOptions);
+        timeEl.textContent = now.toLocaleTimeString();
+      }
+      update();
+      setInterval(update, 1000);
+    }
+
+    // Toast
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const msg = document.getElementById('toastMsg');
+      msg.textContent = message;
+      toast.classList.remove('opacity-0', '-translate-y-2', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', '-translate-y-2', 'pointer-events-none');
+      }, 2500);
+    }
+
+    // Copy to Clipboard
+    function copyToClipboard(text, label = "Text") {
+      const tempInput = document.createElement("input");
+      tempInput.style.position = "fixed";
+      tempInput.style.opacity = "0";
+      tempInput.value = text;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      try {
+        document.execCommand('copy');
+        showToast(`${label} copied!`);
+      } catch (err) {
+        showToast("Could not copy automatically");
+      }
+      document.body.removeChild(tempInput);
+    }
+
+    // Navigation Switcher
+    function switchMainTab(tab) {
+      currentTab = tab;
+      
+      const viewHome = document.getElementById('viewHome');
+      const viewDetail = document.getElementById('viewDetail');
+      const viewInbox = document.getElementById('viewInbox');
+
+      viewHome.classList.add('hidden');
+      viewDetail.classList.add('hidden');
+      viewInbox.classList.add('hidden');
+
+      const tabLeft = document.getElementById('navTabLeft');
+      const tabRight = document.getElementById('navTabRight');
+      
+      tabLeft.classList.remove('text-sky-600');
+      tabRight.classList.remove('text-sky-600');
+      tabLeft.classList.add('text-slate-500');
+      tabRight.classList.add('text-slate-500');
+
+      if (tab === 'home') {
+        viewHome.classList.remove('hidden');
+        tabRight.classList.remove('text-slate-500');
+        tabRight.classList.add('text-sky-600');
+        renderDirectoryList();
+      } else if (tab === 'detail') {
+        viewDetail.classList.remove('hidden');
+        renderDetailView();
+      } else if (tab === 'inbox') {
+        viewInbox.classList.remove('hidden');
+        tabLeft.classList.remove('text-slate-500');
+        tabLeft.classList.add('text-sky-600');
+        renderInboxList();
+      }
+    }
+
+    function goToHomeDefault() {
+      clearOmniSearch();
+      switchMainTab('home');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function clearOmniSearch() {
+      const searchInput = document.getElementById('directoryOmniSearchInput');
+      searchInput.value = '';
+      document.getElementById('clearSearchBtn').classList.add('hidden');
+      currentOmniFilterType = 'all';
+      updateFilterChipsUI();
+      renderDirectoryList();
+    }
+
+    function setOmniFilterType(type) {
+      currentOmniFilterType = type;
+      updateFilterChipsUI();
+      renderDirectoryList();
+    }
+
+    function updateFilterChipsUI() {
+      document.querySelectorAll('.omni-filter-chip').forEach(chip => {
+        const chipType = chip.getAttribute('data-filter');
+        if (chipType === currentOmniFilterType) {
+          chip.classList.remove('bg-white', 'text-slate-600');
+          chip.classList.add('bg-slate-900', 'text-white');
+        } else {
+          chip.classList.remove('bg-slate-900', 'text-white');
+          chip.classList.add('bg-white', 'text-slate-600');
+        }
+      });
+    }
+
+    // DIRECT DATA EXTRACTION & DIRECT ROSTER RENDERER
+    function renderDirectoryList() {
+      const container = document.getElementById('itemsListContainer');
+      const emptyState = document.getElementById('emptyItemsState');
+      const counterBadge = document.getElementById('itemsCounterBadge');
+      const viewTitle = document.getElementById('directoryViewTitle');
+      const viewSubtitle = document.getElementById('directoryViewSubtitle');
+      const query = (document.getElementById('directoryOmniSearchInput').value || '').trim().toLowerCase();
+      const clearBtn = document.getElementById('clearSearchBtn');
+
+      if (query) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+
+      if (currentOmniFilterType === 'phone') {
+        viewTitle.textContent = "Direct Phonebook Roster";
+        viewSubtitle.textContent = "Every contact number listed with its parent item";
+      } else if (currentOmniFilterType === 'email') {
+        viewTitle.textContent = "Direct Email Directory";
+        viewSubtitle.textContent = "All email addresses listed with its parent item";
+      } else if (currentOmniFilterType === 'pdf') {
+        viewTitle.textContent = "Documents & PDFs";
+        viewSubtitle.textContent = "All attached documents and specification files";
+      } else if (currentOmniFilterType === 'media') {
+        viewTitle.textContent = "Photos & Videos Gallery";
+        viewSubtitle.textContent = "Visual attachments across all directory items";
+      } else if (currentOmniFilterType === 'connected') {
+        viewTitle.textContent = "Relationship Network";
+        viewSubtitle.textContent = "Mutual all-sides connections mapped together";
+      } else {
+        viewTitle.textContent = "Contact Book Directory";
+        viewSubtitle.textContent = "All items, media points & multi-way links";
+      }
+
+      // PHONEBOOK ROSTER
+      if (currentOmniFilterType === 'phone') {
+        const phoneList = [];
+        items.forEach(item => {
+          (item.details || []).forEach(pt => {
+            if (pt.type === 'phone') {
+              phoneList.push({
+                itemId: item.id,
+                itemTitle: item.title,
+                category: pt.category || 'Direct Phone',
+                number: pt.value,
+                notes: pt.notes || ''
+              });
+            }
+          });
+        });
+
+        let filteredPhones = phoneList;
+        if (query) {
+          filteredPhones = phoneList.filter(p => 
+            p.itemTitle.toLowerCase().includes(query) ||
+            p.number.toLowerCase().includes(query) ||
+            p.category.toLowerCase().includes(query)
+          );
+        }
+
+        counterBadge.textContent = `${filteredPhones.length} Numbers`;
+
+        if (filteredPhones.length === 0) {
+          container.innerHTML = '';
+          emptyState.classList.remove('hidden');
+          document.getElementById('emptyTitle').textContent = "No Phone Numbers Found";
+          document.getElementById('emptySub').textContent = "Add a phone detail point into any item or adjust search.";
+          return;
+        }
+        emptyState.classList.add('hidden');
+
+        let html = '';
+        filteredPhones.forEach(p => {
+          const cleanPhoneDigits = p.number.replace(/[^0-9+]/g, '');
+          html += `
+            <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-emerald-100 hover:border-emerald-300 shadow-xs transition">
+              <div class="flex items-start justify-between">
+                <div class="min-w-0 pr-2">
+                  <span onclick="openItemDetail('${p.itemId}')" class="cursor-pointer text-[11px] font-bold text-sky-700 hover:text-sky-900 hover:underline flex items-center space-x-1">
+                    <i class="fa-solid fa-folder text-[10px]"></i>
+                    <span class="truncate">${escapeHtml(p.itemTitle)}</span>
+                  </span>
+                  <div class="mt-1 flex items-baseline space-x-2">
+                    <span class="text-base sm:text-lg font-bold font-mono tracking-tight text-slate-900">${escapeHtml(p.number)}</span>
+                  </div>
+                  <span class="inline-block text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md mt-1">
+                    ${escapeHtml(p.category)}
+                  </span>
+                </div>
+                <div class="flex items-center space-x-1.5 shrink-0 pt-0.5">
+                  <a href="tel:${cleanPhoneDigits}" class="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs shadow-xs transition flex items-center space-x-1" title="Call directly">
+                    <i class="fa-solid fa-phone"></i>
+                    <span class="hidden sm:inline font-bold">Call</span>
+                  </a>
+                  <a href="https://wa.me/${cleanPhoneDigits.replace('+', '')}" target="_blank" rel="noopener noreferrer" class="p-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs shadow-xs transition" title="WhatsApp">
+                    <i class="fa-brands fa-whatsapp text-sm"></i>
+                  </a>
+                  <button onclick="copyToClipboard('${escapeHtml(p.number)}', 'Phone number')" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs transition" title="Copy">
+                    <i class="fa-regular fa-copy"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+        return;
+      }
+
+      // EMAIL DIRECTORY
+      if (currentOmniFilterType === 'email') {
+        const emailList = [];
+        items.forEach(item => {
+          (item.details || []).forEach(pt => {
+            if (pt.type === 'email') {
+              emailList.push({
+                itemId: item.id,
+                itemTitle: item.title,
+                category: pt.category || 'Official Email',
+                email: pt.value
+              });
+            }
+          });
+        });
+
+        let filteredEmails = emailList;
+        if (query) {
+          filteredEmails = emailList.filter(e => 
+            e.itemTitle.toLowerCase().includes(query) ||
+            e.email.toLowerCase().includes(query) ||
+            e.category.toLowerCase().includes(query)
+          );
+        }
+
+        counterBadge.textContent = `${filteredEmails.length} Emails`;
+
+        if (filteredEmails.length === 0) {
+          container.innerHTML = '';
+          emptyState.classList.remove('hidden');
+          document.getElementById('emptyTitle').textContent = "No Email Addresses Found";
+          document.getElementById('emptySub').textContent = "Add an email point into an item or adjust search.";
+          return;
+        }
+        emptyState.classList.add('hidden');
+
+        let html = '';
+        filteredEmails.forEach(e => {
+          html += `
+            <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-blue-100 hover:border-blue-300 shadow-xs transition">
+              <div class="flex items-start justify-between">
+                <div class="min-w-0 pr-2">
+                  <span onclick="openItemDetail('${e.itemId}')" class="cursor-pointer text-[11px] font-bold text-sky-700 hover:text-sky-900 hover:underline flex items-center space-x-1">
+                    <i class="fa-solid fa-folder text-[10px]"></i>
+                    <span class="truncate">${escapeHtml(e.itemTitle)}</span>
+                  </span>
+                  <div class="mt-1">
+                    <span class="text-sm sm:text-base font-bold text-blue-900 break-all">${escapeHtml(e.email)}</span>
+                  </div>
+                  <span class="inline-block text-[10px] font-semibold text-blue-800 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md mt-1">
+                    ${escapeHtml(e.category)}
+                  </span>
+                </div>
+                <div class="flex items-center space-x-1.5 shrink-0 pt-0.5">
+                  <a href="mailto:${escapeHtml(e.email)}" class="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs shadow-xs transition flex items-center space-x-1" title="Send Email">
+                    <i class="fa-solid fa-envelope"></i>
+                    <span class="hidden sm:inline font-bold">Mail</span>
+                  </a>
+                  <button onclick="copyToClipboard('${escapeHtml(e.email)}', 'Email address')" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs transition" title="Copy">
+                    <i class="fa-regular fa-copy"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+        return;
+      }
+
+      // PDFS & DOCS
+      if (currentOmniFilterType === 'pdf') {
+        const docList = [];
+        items.forEach(item => {
+          (item.details || []).forEach(pt => {
+            if (pt.type === 'pdf') {
+              docList.push({
+                itemId: item.id,
+                itemTitle: item.title,
+                category: pt.category || 'PDF Document',
+                fileName: pt.fileName || pt.value,
+                url: pt.value
+              });
+            }
+          });
+        });
+
+        let filteredDocs = docList;
+        if (query) {
+          filteredDocs = docList.filter(d => 
+            d.itemTitle.toLowerCase().includes(query) ||
+            d.fileName.toLowerCase().includes(query) ||
+            d.category.toLowerCase().includes(query)
+          );
+        }
+
+        counterBadge.textContent = `${filteredDocs.length} Docs`;
+
+        if (filteredDocs.length === 0) {
+          container.innerHTML = '';
+          emptyState.classList.remove('hidden');
+          document.getElementById('emptyTitle').textContent = "No Documents Found";
+          document.getElementById('emptySub').textContent = "Upload or link a PDF inside an item.";
+          return;
+        }
+        emptyState.classList.add('hidden');
+
+        let html = '';
+        filteredDocs.forEach(d => {
+          html += `
+            <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-rose-100 hover:border-rose-300 shadow-xs transition flex items-center justify-between">
+              <div class="flex items-center space-x-3 min-w-0 pr-2">
+                <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg shrink-0 border border-rose-100">
+                  <i class="fa-solid fa-file-pdf"></i>
+                </div>
+                <div class="min-w-0">
+                  <span onclick="openItemDetail('${d.itemId}')" class="cursor-pointer text-[10px] font-bold text-sky-700 hover:underline truncate block">
+                    Item: ${escapeHtml(d.itemTitle)}
+                  </span>
+                  <h4 class="text-xs sm:text-sm font-bold text-slate-800 truncate">${escapeHtml(d.fileName)}</h4>
+                  <span class="text-[10px] text-rose-700 font-semibold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100">${escapeHtml(d.category)}</span>
+                </div>
+              </div>
+              <a href="${escapeHtml(d.url)}" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shrink-0 shadow-xs flex items-center space-x-1.5 transition">
+                <span>Open</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+              </a>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+        return;
+      }
+
+      // PHOTOS & VIDEOS GALLERY
+      if (currentOmniFilterType === 'media') {
+        const mediaList = [];
+        items.forEach(item => {
+          (item.details || []).forEach(pt => {
+            if (pt.type === 'image' || pt.type === 'video') {
+              mediaList.push({
+                itemId: item.id,
+                itemTitle: item.title,
+                type: pt.type,
+                category: pt.category || 'Media',
+                url: pt.value
+              });
+            }
+          });
+        });
+
+        let filteredMedia = mediaList;
+        if (query) {
+          filteredMedia = mediaList.filter(m => 
+            m.itemTitle.toLowerCase().includes(query) ||
+            m.category.toLowerCase().includes(query)
+          );
+        }
+
+        counterBadge.textContent = `${filteredMedia.length} Media`;
+
+        if (filteredMedia.length === 0) {
+          container.innerHTML = '';
+          emptyState.classList.remove('hidden');
+          document.getElementById('emptyTitle').textContent = "No Photos or Videos";
+          document.getElementById('emptySub').textContent = "Add image/video points into your items.";
+          return;
+        }
+        emptyState.classList.add('hidden');
+
+        let html = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">';
+        filteredMedia.forEach(m => {
+          html += `
+            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:border-amber-400 transition flex flex-col">
+              <div class="relative bg-black flex items-center justify-center min-h-[140px] max-h-48 overflow-hidden">
+                ${m.type === 'image' 
+                  ? `<img src="${escapeHtml(m.url)}" alt="Media preview" class="w-full h-40 object-cover" onerror="this.src='https://placehold.co/400x250/f1f5f9/64748b?text=Image+Unavailable'" />`
+                  : `<video controls class="w-full h-40 object-cover bg-black"><source src="${escapeHtml(m.url)}" type="video/mp4" /></video>`
+                }
+                <span class="absolute top-2 left-2 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-black/70 text-white backdrop-blur">
+                  ${m.type === 'image' ? '<i class="fa-solid fa-camera mr-1"></i>Image' : '<i class="fa-solid fa-video mr-1"></i>Video'}
+                </span>
+              </div>
+              <div class="p-3 flex-1 flex flex-col justify-between">
+                <div>
+                  <span onclick="openItemDetail('${m.itemId}')" class="cursor-pointer text-[10px] font-bold text-sky-700 hover:underline block truncate">
+                    ${escapeHtml(m.itemTitle)}
+                  </span>
+                  <span class="text-xs font-semibold text-slate-800">${escapeHtml(m.category)}</span>
+                </div>
+                <div class="pt-2 mt-2 border-t border-slate-100 flex items-center justify-between">
+                  <button onclick="openItemDetail('${m.itemId}')" class="text-[11px] font-semibold text-slate-500 hover:text-sky-600 transition">
+                    View Item <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                  </button>
+                  <a href="${escapeHtml(m.url)}" target="_blank" class="text-[11px] text-slate-400 hover:text-slate-700" title="Open full media">
+                    <i class="fa-solid fa-expand"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+        return;
+      }
+
+      // RELATIONSHIP NETWORK
+      if (currentOmniFilterType === 'connected') {
+        const connectedItems = items.filter(it => (it.linkedItemIds || []).length > 0);
+        let filteredConn = connectedItems;
+
+        if (query) {
+          filteredConn = connectedItems.filter(it => 
+            it.title.toLowerCase().includes(query) ||
+            (it.linkedItemIds || []).some(lid => {
+              const matched = items.find(x => x.id === lid);
+              return matched && matched.title.toLowerCase().includes(query);
+            })
+          );
+        }
+
+        counterBadge.textContent = `${filteredConn.length} Linked`;
+
+        if (filteredConn.length === 0) {
+          container.innerHTML = '';
+          emptyState.classList.remove('hidden');
+          document.getElementById('emptyTitle').textContent = "No Connected Items";
+          document.getElementById('emptySub').textContent = "Use 'Manage Links' in any item to link items mutually.";
+          return;
+        }
+        emptyState.classList.add('hidden');
+
+        let html = '';
+        filteredConn.forEach(source => {
+          html += `
+            <div class="bg-white p-4 rounded-2xl border border-indigo-100 shadow-xs hover:border-indigo-300 transition">
+              <div class="flex items-center justify-between mb-2 pb-2 border-b border-indigo-50">
+                <h4 onclick="openItemDetail('${source.id}')" class="text-sm font-bold text-slate-900 cursor-pointer hover:text-indigo-600 truncate">
+                  ${escapeHtml(source.title)}
+                </h4>
+                <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full shrink-0">
+                  ${(source.linkedItemIds || []).length} Mutual Links
+                </span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                ${source.linkedItemIds.map(lid => {
+                  const target = items.find(t => t.id === lid);
+                  if (!target) return '';
+                  return `
+                    <span onclick="openItemDetail('${target.id}')" class="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-xl bg-slate-50 hover:bg-indigo-50 text-indigo-900 border border-slate-200 hover:border-indigo-200 cursor-pointer transition">
+                      <i class="fa-solid fa-link text-[10px] text-indigo-500 mr-1.5"></i>
+                      <span class="truncate max-w-[150px]">${escapeHtml(target.title)}</span>
+                    </span>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+        return;
+      }
+
+      // DEFAULT CONTACT BOOK VIEW (A-Z)
+      let filtered = [...items];
+
+      if (query) {
+        filtered = filtered.filter(item => {
+          const titleMatch = item.title && item.title.toLowerCase().includes(query);
+          const descMatch = item.description && item.description.toLowerCase().includes(query);
+          const dateMatch = item.createdAt && item.createdAt.toLowerCase().includes(query);
+          
+          const detailsMatch = (item.details || []).some(pt => {
+            const cat = pt.category && pt.category.toLowerCase().includes(query);
+            const val = pt.value && pt.value.toLowerCase().includes(query);
+            const fn = pt.fileName && pt.fileName.toLowerCase().includes(query);
+            const typ = pt.type && pt.type.toLowerCase().includes(query);
+            return cat || val || fn || typ;
+          });
+
+          const linkedMatch = (item.linkedItemIds || []).some(lid => {
+            const linkedObj = items.find(it => it.id === lid);
+            return linkedObj && linkedObj.title.toLowerCase().includes(query);
+          });
+
+          return titleMatch || descMatch || dateMatch || detailsMatch || linkedMatch;
+        });
+      }
+
+      counterBadge.textContent = `${items.length} ${items.length === 1 ? 'Item' : 'Items'}`;
+
+      if (filtered.length === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        document.getElementById('emptyTitle').textContent = "No Items Found";
+        document.getElementById('emptySub').textContent = "Tap the center Star icon to create an item or clear search.";
+        return;
+      }
+      emptyState.classList.add('hidden');
+
+      filtered.sort((a, b) => {
+        const cleanA = a.title.replace(/^Item [A-Z]:\s*/i, '').trim();
+        const cleanB = b.title.replace(/^Item [A-Z]:\s*/i, '').trim();
+        return cleanA.localeCompare(cleanB);
+      });
+
+      let currentSectionLetter = '';
+      let html = '';
+
+      filtered.forEach(item => {
+        const cleanTitle = item.title.replace(/^Item [A-Z]:\s*/i, '').trim();
+        const firstLetter = (cleanTitle.charAt(0) || '#').toUpperCase();
+
+        if (firstLetter !== currentSectionLetter) {
+          currentSectionLetter = firstLetter;
+          html += `
+            <div class="sticky top-12 z-20 bg-slate-100/95 backdrop-blur px-2.5 py-1 text-xs font-black text-sky-800 tracking-wider uppercase border-y border-slate-200/60 flex items-center justify-between">
+              <span>${currentSectionLetter}</span>
+              <span class="text-[10px] text-slate-400 font-normal">Section</span>
+            </div>
+          `;
+        }
+
+        const linkedCount = (item.linkedItemIds || []).length;
+        const detailsCount = (item.details || []).length;
+        const initials = cleanTitle.slice(0, 2).toUpperCase() || 'IT';
+
+        const hasPhone = (item.details || []).some(d => d.type === 'phone');
+        const hasEmail = (item.details || []).some(d => d.type === 'email');
+        const hasMedia = (item.details || []).some(d => d.type === 'image' || d.type === 'video');
+        const hasPdf = (item.details || []).some(d => d.type === 'pdf');
+
+        html += `
+          <div onclick="openItemDetail('${item.id}')" class="group bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 hover:border-sky-400 hover:shadow-md transition cursor-pointer flex items-center justify-between">
+            <div class="flex items-center space-x-3.5 min-w-0">
+              <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                ${initials}
+              </div>
+              <div class="min-w-0">
+                <h3 class="text-sm font-bold text-slate-800 group-hover:text-sky-600 transition truncate">${escapeHtml(item.title)}</h3>
+                <p class="text-xs text-slate-500 truncate max-w-xs sm:max-w-md mt-0.5">${escapeHtml(item.description || 'No description added')}</p>
+                
+                <div class="flex items-center space-x-1.5 mt-2 flex-wrap gap-y-1">
+                  <span class="inline-flex items-center text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/60 px-2 py-0.5 rounded-full">
+                    <i class="fa-solid fa-circle-nodes mr-1 text-[9px]"></i> ${linkedCount} Connected
+                  </span>
+                  <span class="inline-flex items-center text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
+                    <i class="fa-solid fa-list mr-1 text-[9px] text-sky-500"></i> ${detailsCount} Points
+                  </span>
+
+                  ${hasPhone ? '<span class="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100"><i class="fa-solid fa-phone"></i></span>' : ''}
+                  ${hasEmail ? '<span class="text-[10px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100"><i class="fa-solid fa-envelope"></i></span>' : ''}
+                  ${hasPdf ? '<span class="text-[10px] text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100"><i class="fa-solid fa-file-pdf"></i></span>' : ''}
+                  ${hasMedia ? '<span class="text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100"><i class="fa-solid fa-photo-film"></i></span>' : ''}
+                </div>
+              </div>
+            </div>
+            <div class="text-slate-300 group-hover:text-sky-500 pl-2">
+              <i class="fa-solid fa-chevron-right text-xs"></i>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function openItemDetail(itemId) {
+      currentActiveItemId = itemId;
+      switchMainTab('detail');
+    }
+
+    // Detail View Renderer
+    function renderDetailView() {
+      const item = items.find(it => it.id === currentActiveItemId);
+      if (!item) {
+        switchMainTab('home');
+        return;
+      }
+
+      document.getElementById('detailTitle').textContent = item.title;
+      document.getElementById('detailDescription').textContent = item.description || "No general description provided.";
+      document.getElementById('detailDate').textContent = item.createdAt || "Recently";
+      document.getElementById('detailId').textContent = '#' + item.id.toUpperCase();
+
+      const linkedContainer = document.getElementById('detailLinkedItemsList');
+      const linkedIds = item.linkedItemIds || [];
+
+      if (linkedIds.length === 0) {
+        linkedContainer.innerHTML = `
+          <div class="w-full text-center py-3">
+            <span class="text-xs text-slate-400 italic">No connected items yet. Click "Manage Links" to connect existing or add new ones!</span>
+          </div>
+        `;
+      } else {
+        let linksHtml = '';
+        linkedIds.forEach(id => {
+          const linkedObj = items.find(it => it.id === id);
+          if (linkedObj) {
+            linksHtml += `
+              <div class="inline-flex items-center bg-white hover:bg-indigo-50 text-indigo-900 text-xs font-semibold px-3 py-1.5 rounded-xl border border-indigo-200 transition shadow-xs group">
+                <span onclick="openItemDetail('${linkedObj.id}')" class="cursor-pointer flex items-center space-x-1.5">
+                  <i class="fa-solid fa-link text-indigo-500 text-[10px]"></i>
+                  <span class="truncate max-w-[160px]">${escapeHtml(linkedObj.title)}</span>
+                </span>
+                <button onclick="unlinkMutualItemDirectly('${linkedObj.id}')" class="ml-2 text-slate-400 hover:text-rose-500 p-0.5 rounded transition" title="Unlink">
+                  <i class="fa-solid fa-xmark text-[11px]"></i>
+                </button>
+              </div>
+            `;
+          }
+        });
+        linkedContainer.innerHTML = linksHtml || `<span class="text-xs text-slate-400 italic">Linked items not found.</span>`;
+      }
+
+      const pointsContainer = document.getElementById('detailPointsContainer');
+      const points = item.details || [];
+
+      if (points.length === 0) {
+        pointsContainer.innerHTML = `
+          <div class="text-center py-8 bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-4">
+            <p class="text-xs text-slate-500">No detail points added yet.</p>
+            <p class="text-[11px] text-slate-400 mt-1">Add phone numbers, emails, photos, PDFs, or notes with categories.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let pointsHtml = '';
+      points.forEach((point, index) => {
+        let badgeColor = "bg-slate-100 text-slate-700";
+        let icon = "fa-circle-dot";
+
+        if (point.type === 'phone') {
+          badgeColor = "bg-emerald-50 text-emerald-700 border-emerald-200";
+          icon = "fa-phone";
+        } else if (point.type === 'email') {
+          badgeColor = "bg-blue-50 text-blue-700 border-blue-200";
+          icon = "fa-envelope";
+        } else if (point.type === 'pdf') {
+          badgeColor = "bg-rose-50 text-rose-700 border-rose-200";
+          icon = "fa-file-pdf";
+        } else if (point.type === 'image') {
+          badgeColor = "bg-amber-50 text-amber-700 border-amber-200";
+          icon = "fa-image";
+        } else if (point.type === 'video') {
+          badgeColor = "bg-purple-50 text-purple-700 border-purple-200";
+          icon = "fa-video";
+        } else if (point.type === 'voice') {
+          badgeColor = "bg-teal-50 text-teal-700 border-teal-200";
+          icon = "fa-microphone";
+        }
+
+        let bodyContent = '';
+        if (point.type === 'phone') {
+          const clean = point.value.replace(/[^0-9+]/g, '');
+          bodyContent = `
+            <div class="flex items-center justify-between">
+              <a href="tel:${clean}" class="text-sm font-bold text-emerald-700 hover:underline flex items-center">
+                <i class="fa-solid fa-phone mr-1.5 text-xs"></i> ${escapeHtml(point.value)}
+              </a>
+              <div class="flex space-x-1.5">
+                <a href="tel:${clean}" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold rounded-lg shadow-2xs">Call</a>
+                <button onclick="copyToClipboard('${escapeHtml(point.value)}', 'Phone')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold rounded-lg">Copy</button>
+              </div>
+            </div>
+          `;
+        } else if (point.type === 'email') {
+          bodyContent = `
+            <div class="flex items-center justify-between">
+              <a href="mailto:${escapeHtml(point.value)}" class="text-sm font-bold text-blue-700 hover:underline flex items-center truncate max-w-[200px] sm:max-w-xs">
+                <i class="fa-solid fa-envelope mr-1.5 text-xs"></i> ${escapeHtml(point.value)}
+              </a>
+              <div class="flex space-x-1.5">
+                <a href="mailto:${escapeHtml(point.value)}" class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-semibold rounded-lg shadow-2xs">Mail</a>
+                <button onclick="copyToClipboard('${escapeHtml(point.value)}', 'Email')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold rounded-lg">Copy</button>
+              </div>
+            </div>
+          `;
+        } else if (point.type === 'image') {
+          bodyContent = `
+            <div class="mt-1">
+              <img src="${escapeHtml(point.value)}" alt="Point media" class="w-full max-h-56 object-cover rounded-xl border border-slate-200 shadow-xs" onerror="this.src='https://placehold.co/600x300/f1f5f9/64748b?text=Image+Preview'" />
+            </div>
+          `;
+        } else if (point.type === 'video') {
+          bodyContent = `
+            <div class="mt-1">
+              <video controls class="w-full max-h-56 rounded-xl border border-slate-200 bg-black">
+                <source src="${escapeHtml(point.value)}" type="video/mp4" />
+              </video>
+            </div>
+          `;
+        } else if (point.type === 'pdf') {
+          bodyContent = `
+            <a href="${escapeHtml(point.value)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-2 bg-rose-50 border border-rose-200 p-2.5 rounded-xl text-xs font-semibold text-rose-800 hover:bg-rose-100 transition">
+              <i class="fa-solid fa-file-pdf text-base text-rose-600"></i>
+              <span class="truncate max-w-[220px]">${escapeHtml(point.fileName || point.value)}</span>
+              <span class="text-[10px] bg-white px-2 py-0.5 rounded text-rose-700 font-bold border border-rose-200">Open File</span>
+            </a>
+          `;
+        } else if (point.type === 'voice') {
+          bodyContent = `
+            <div class="bg-teal-50 border border-teal-200 p-2.5 rounded-xl flex items-center justify-between text-xs text-teal-900">
+              <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-volume-high text-teal-600"></i>
+                <span>${escapeHtml(point.value || "Recorded Voice Memo")}</span>
+              </div>
+              <span class="text-[10px] font-mono text-teal-700">Audio Note</span>
+            </div>
+          `;
+        } else {
+          bodyContent = `<p class="text-xs sm:text-sm text-slate-700 whitespace-pre-line">${escapeHtml(point.value)}</p>`;
+        }
+
+        pointsHtml += `
+          <div class="p-3.5 bg-white border border-slate-200 rounded-2xl shadow-xs hover:border-slate-300 transition">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center space-x-2">
+                <span class="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${badgeColor}">
+                  <i class="fa-solid ${icon} mr-1 text-[9px]"></i> ${escapeHtml(point.category || "General")}
+                </span>
+                <span class="text-[10px] text-slate-400 font-mono">#${index + 1}</span>
+              </div>
+              <button onclick="deleteDetailPoint('${point.id}')" class="text-slate-400 hover:text-rose-500 p-1 text-xs" title="Remove point">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+            <div class="mt-1">
+              ${bodyContent}
+            </div>
+          </div>
+        `;
+      });
+
+      pointsContainer.innerHTML = pointsHtml;
+    }
+
+    function unlinkMutualItemDirectly(targetId) {
+      if (!currentActiveItemId) return;
+      unlinkItemsMutually(currentActiveItemId, targetId);
+      renderDetailView();
+      showToast("Mutual link removed from both items");
+    }
+
+    document.getElementById('btnOpenConnectModal').addEventListener('click', () => {
+      populateDirectConnectionCheckboxes();
+      openModal('modalManageConnections');
+    });
+
+    function populateDirectConnectionCheckboxes() {
+      const container = document.getElementById('directConnectionCheckboxContainer');
+      const current = items.find(it => it.id === currentActiveItemId);
+      if (!current) return;
+
+      const candidates = items.filter(it => it.id !== current.id);
+      if (candidates.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 p-2 italic">No other items exist yet. Use the box above to create and link a new item!</p>`;
+        return;
+      }
+
+      const activeLinked = current.linkedItemIds || [];
+      let html = '';
+      candidates.forEach(cand => {
+        const isChecked = activeLinked.includes(cand.id) ? 'checked' : '';
+        html += `
+          <label class="flex items-center justify-between text-xs text-slate-700 hover:bg-indigo-50/60 p-2 rounded-xl cursor-pointer transition border border-transparent hover:border-indigo-100">
+            <div class="flex items-center space-x-2 min-w-0">
+              <input type="checkbox" value="${cand.id}" class="direct-link-checkbox rounded text-indigo-600 focus:ring-indigo-500" ${isChecked} />
+              <span class="font-bold truncate">${escapeHtml(cand.title)}</span>
+            </div>
+            <span class="text-[10px] text-slate-400 shrink-0 ml-2">#${cand.id}</span>
+          </label>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function saveDirectConnections() {
+      if (!currentActiveItemId) return;
+      const selectedIds = [];
+      document.querySelectorAll('.direct-link-checkbox:checked').forEach(cb => {
+        selectedIds.push(cb.value);
+      });
+
+      setMutualLinksForSource(currentActiveItemId, selectedIds);
+      closeModal('modalManageConnections');
+      renderDetailView();
+      showToast("Updated all-sided connections!");
+    }
+
+    // Quick Inbox List Renderer
+    function renderInboxList() {
+      const container = document.getElementById('inboxListContainer');
+      const counter = document.getElementById('inboxCount');
+      counter.textContent = inboxItems.length;
+
+      if (inboxItems.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-10 bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-4">
+            <i class="fa-regular fa-folder-closed text-slate-300 text-3xl mb-2"></i>
+            <p class="text-xs text-slate-500">Inbox is empty.</p>
+            <p class="text-[10px] text-slate-400">Capture quick thoughts, photos, or audio above without categorizing yet.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      inboxItems.forEach(item => {
+        let mediaSnippet = '';
+        if (item.type === 'image' && item.fileUrl) {
+          mediaSnippet = `<img src="${item.fileUrl}" class="w-12 h-12 object-cover rounded-lg border border-slate-200 shrink-0" onerror="this.src='https://placehold.co/100x100?text=IMG'"/>`;
+        } else if (item.type === 'voice') {
+          mediaSnippet = `<div class="w-10 h-10 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center text-sm shrink-0"><i class="fa-solid fa-microphone"></i></div>`;
+        } else if (item.type === 'file') {
+          mediaSnippet = `<div class="w-10 h-10 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center text-sm shrink-0"><i class="fa-solid fa-file-pdf"></i></div>`;
+        } else {
+          mediaSnippet = `<div class="w-10 h-10 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center text-sm shrink-0"><i class="fa-solid fa-note-sticky"></i></div>`;
+        }
+
+        html += `
+          <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs flex items-start justify-between space-x-3">
+            <div class="flex items-start space-x-3 min-w-0">
+              ${mediaSnippet}
+              <div class="min-w-0">
+                <span class="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 mb-0.5">${item.type}</span>
+                <p class="text-xs text-slate-800 line-clamp-2">${escapeHtml(item.content || item.fileUrl || "Media item")}</p>
+                <span class="text-[10px] text-slate-400 mt-1 block">${item.date || "Recent"}</span>
+              </div>
+            </div>
+            <div class="flex flex-col space-y-1.5 shrink-0">
+              <button onclick="openConvertModal('${item.id}')" class="px-2.5 py-1 text-[11px] font-bold bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition shadow-xs">
+                Arrange <i class="fa-solid fa-arrow-right ml-1"></i>
+              </button>
+              <button onclick="deleteInboxItem('${item.id}')" class="text-slate-400 hover:text-rose-500 text-[10px] text-center">
+                Dismiss
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function openCreateItemModal() {
+      document.getElementById('editItemId').value = '';
+      document.getElementById('inputItemTitle').value = '';
+      document.getElementById('inputItemDesc').value = '';
+      document.getElementById('inputQuickNewConnectedItem').value = '';
+      document.getElementById('modalItemHeaderTitle').textContent = 'Create New Item';
+      populateLinkSelector([]);
+      openModal('modalItem');
+    }
+
+    function populateLinkSelector(selectedIds = []) {
+      const container = document.getElementById('linkSelectorContainer');
+      const currentEditId = document.getElementById('editItemId').value;
+      const candidates = items.filter(it => it.id !== currentEditId);
+
+      if (candidates.length === 0) {
+        container.innerHTML = `<p class="text-[11px] text-slate-400 italic p-1">No other items exist yet. Use the field above to add one!</p>`;
+        return;
+      }
+
+      let html = '';
+      candidates.forEach(cand => {
+        const isChecked = selectedIds.includes(cand.id) ? 'checked' : '';
+        html += `
+          <label class="flex items-center space-x-2 text-xs text-slate-700 hover:bg-slate-50 p-1.5 rounded-lg cursor-pointer transition">
+            <input type="checkbox" value="${cand.id}" class="link-item-checkbox rounded text-sky-600 focus:ring-sky-500" ${isChecked} />
+            <span class="font-semibold truncate">${escapeHtml(cand.title)}</span>
+          </label>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function saveItemRecord() {
+      const titleInput = document.getElementById('inputItemTitle');
+      const descInput = document.getElementById('inputItemDesc');
+      const editId = document.getElementById('editItemId').value;
+
+      const title = titleInput.value.trim();
+      if (!title) {
+        titleInput.focus();
+        showToast("Please provide an Item title");
+        return;
+      }
+
+      const selectedLinks = [];
+      document.querySelectorAll('.link-item-checkbox:checked').forEach(cb => {
+        selectedLinks.push(cb.value);
+      });
+
+      if (editId) {
+        const item = items.find(it => it.id === editId);
+        if (item) {
+          item.title = title;
+          item.description = descInput.value.trim();
+          setMutualLinksForSource(item.id, selectedLinks);
+          saveItemToCloud(item);
+          saveData();
+          showToast("Item and mutual links updated");
+        }
+      } else {
+        const newId = 'item_' + Date.now().toString(36);
+        const newItem = {
+          id: newId,
+          title: title,
+          description: descInput.value.trim(),
+          createdAt: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }),
+          linkedItemIds: [],
+          details: []
+        };
+        items.push(newItem);
+        setMutualLinksForSource(newId, selectedLinks);
+        saveItemToCloud(newItem);
+        saveData();
+        showToast("Item created with all-sided links!");
+        currentActiveItemId = newId;
+        switchMainTab('detail');
+      }
+
+      closeModal('modalItem');
+      renderDirectoryList();
+    }
+
+    document.getElementById('btnEditItem').addEventListener('click', () => {
+      const item = items.find(it => it.id === currentActiveItemId);
+      if (!item) return;
+      document.getElementById('editItemId').value = item.id;
+      document.getElementById('inputItemTitle').value = item.title;
+      document.getElementById('inputItemDesc').value = item.description || '';
+      document.getElementById('inputQuickNewConnectedItem').value = '';
+      document.getElementById('modalItemHeaderTitle').textContent = 'Edit Item & Connections';
+      populateLinkSelector(item.linkedItemIds || []);
+      openModal('modalItem');
+    });
+
+    document.getElementById('btnDeleteItem').addEventListener('click', () => {
+      if (!currentActiveItemId) return;
+      const targetItem = items.find(it => it.id === currentActiveItemId);
+      const title = targetItem ? targetItem.title : "this item";
+
+      showConfirmModal(
+        "Delete Item", 
+        `Are you sure you want to permanently delete "${title}"? This cannot be undone.`,
+        () => {
+          const targetId = currentActiveItemId;
+          deleteItemFromCloud(targetId);
+          items.forEach(it => {
+            if (it.linkedItemIds && it.linkedItemIds.includes(targetId)) {
+              it.linkedItemIds = it.linkedItemIds.filter(id => id !== targetId);
+              saveItemToCloud(it);
+            }
+          });
+          items = items.filter(it => it.id !== targetId);
+          saveData();
+          showToast("Item deleted permanently");
+          currentActiveItemId = null;
+          switchMainTab('home');
+        }
+      );
+    });
+
+    // Detail Point Operations
+    document.getElementById('btnOpenAddDetailModal').addEventListener('click', () => {
+      document.getElementById('inputDetailCategory').value = '';
+      document.getElementById('inputDetailValue').value = '';
+      document.getElementById('inputDetailType').value = 'text';
+      handleDetailTypeChange('text');
+      openModal('modalDetailPoint');
+    });
+
+    function applyQuickCategory(val) {
+      if (!val) return;
+      document.getElementById('inputDetailCategory').value = val;
+      if (val === 'Phone Number') {
+        document.getElementById('inputDetailType').value = 'phone';
+        handleDetailTypeChange('phone');
+      } else if (val === 'Official Email') {
+        document.getElementById('inputDetailType').value = 'email';
+        handleDetailTypeChange('email');
+      } else if (val === 'PDF Document') {
+        document.getElementById('inputDetailType').value = 'pdf';
+        handleDetailTypeChange('pdf');
+      } else if (val === 'Site Photo') {
+        document.getElementById('inputDetailType').value = 'image';
+        handleDetailTypeChange('image');
+      } else if (val === 'Video Tour') {
+        document.getElementById('inputDetailType').value = 'video';
+        handleDetailTypeChange('video');
+      } else if (val === 'Voice Memo') {
+        document.getElementById('inputDetailType').value = 'voice';
+        handleDetailTypeChange('voice');
+      }
+    }
+
+    function handleDetailTypeChange(type) {
+      const fileHelper = document.getElementById('detailFileHelper');
+      const valLabel = document.getElementById('detailValueLabel');
+      const valInput = document.getElementById('inputDetailValue');
+
+      if (type === 'image' || type === 'pdf' || type === 'video') {
+        fileHelper.classList.remove('hidden');
+        valLabel.textContent = `${type.toUpperCase()} File URL or upload below`;
+        valInput.placeholder = `Enter online URL or pick a file below...`;
+      } else if (type === 'phone') {
+        fileHelper.classList.add('hidden');
+        valLabel.textContent = "Phone Number (Click-to-Call)";
+        valInput.placeholder = "+91 98765 43210";
+      } else if (type === 'email') {
+        fileHelper.classList.add('hidden');
+        valLabel.textContent = "Email Address (Click-to-Mail)";
+        valInput.placeholder = "contact@example.com";
+      } else if (type === 'voice') {
+        fileHelper.classList.add('hidden');
+        valLabel.textContent = "Voice Memo Transcription / Summary";
+        valInput.placeholder = "Details of recorded note...";
+      } else {
+        fileHelper.classList.add('hidden');
+        valLabel.textContent = "Detail Content / Text Note";
+        valInput.placeholder = "Enter your note or detail point...";
+      }
+    }
+
+    function processDetailFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('inputDetailValue').value = e.target.result;
+        stagedUploadedFile = { name: file.name, size: file.size };
+        showToast(`Loaded "${file.name}"`);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function saveDetailPoint() {
+      const item = items.find(it => it.id === currentActiveItemId);
+      if (!item) return;
+
+      const category = document.getElementById('inputDetailCategory').value.trim() || 'General';
+      const type = document.getElementById('inputDetailType').value;
+      const value = document.getElementById('inputDetailValue').value.trim();
+
+      if (!value) {
+        showToast("Please enter a value or choose a file");
+        return;
+      }
+
+      if (!item.details) item.details = [];
+      const newPoint = {
+        id: 'pt_' + Date.now().toString(36),
+        category: category,
+        type: type,
+        value: value,
+        fileName: stagedUploadedFile ? stagedUploadedFile.name : undefined
+      };
+
+      item.details.push(newPoint);
+      saveItemToCloud(item);
+      saveData();
+      stagedUploadedFile = null;
+      closeModal('modalDetailPoint');
+      renderDetailView();
+      showToast("Detail point added");
+    }
+
+    function deleteDetailPoint(pointId) {
+      const item = items.find(it => it.id === currentActiveItemId);
+      if (!item || !item.details) return;
+      item.details = item.details.filter(pt => pt.id !== pointId);
+      saveItemToCloud(item);
+      saveData();
+      renderDetailView();
+      showToast("Point removed");
+    }
+
+    // Quick Inbox Operations
+    function setInboxType(type) {
+      currentInboxType = type;
+      document.querySelectorAll('.inbox-type-btn').forEach(b => {
+        b.classList.remove('border-sky-500', 'bg-sky-50', 'text-sky-700');
+        b.classList.add('border-slate-200', 'bg-slate-50', 'text-slate-600');
+      });
+
+      const fileRow = document.getElementById('inboxFileUploadRow');
+      const voiceRow = document.getElementById('inboxVoiceRow');
+      const inputEl = document.getElementById('inboxRawInput');
+
+      fileRow.classList.add('hidden');
+      voiceRow.classList.add('hidden');
+
+      if (type === 'note') {
+        document.getElementById('inboxTypeNote').classList.add('border-sky-500', 'bg-sky-50', 'text-sky-700');
+        inputEl.placeholder = "Jot down a quick thought, link, or phone number...";
+      } else if (type === 'image') {
+        document.getElementById('inboxTypeImage').classList.add('border-sky-500', 'bg-sky-50', 'text-sky-700');
+        fileRow.classList.remove('hidden');
+        inputEl.placeholder = "Image description or caption (optional)...";
+      } else if (type === 'voice') {
+        document.getElementById('inboxTypeVoice').classList.add('border-sky-500', 'bg-sky-50', 'text-sky-700');
+        voiceRow.classList.remove('hidden');
+        inputEl.placeholder = "Type quick voice transcript or click Record...";
+      } else if (type === 'file') {
+        document.getElementById('inboxTypeFile').classList.add('border-sky-500', 'bg-sky-50', 'text-sky-700');
+        fileRow.classList.remove('hidden');
+        inputEl.placeholder = "Document description or notes...";
+      }
+    }
+
+    document.getElementById('btnRecordVoice').addEventListener('click', () => {
+      const statusEl = document.getElementById('voiceStatus');
+      statusEl.textContent = "Listening... (Simulating 3s recording)";
+      setTimeout(() => {
+        statusEl.textContent = "Recording captured!";
+        document.getElementById('inboxRawInput').value = "Voice Memo: Review blueprints with team.";
+        showToast("Voice note captured");
+      }, 1200);
+    });
+
+    document.getElementById('btnSaveToInbox').addEventListener('click', () => {
+      const rawText = document.getElementById('inboxRawInput').value.trim();
+      const fileInput = document.getElementById('inboxFileInput');
+
+      if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          pushInboxItem(rawText, e.target.result);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        if (!rawText) {
+          showToast("Please enter a note or select a file");
+          return;
+        }
+        pushInboxItem(rawText, '');
+      }
+    });
+
+    function pushInboxItem(content, fileUrl) {
+      const newInboxId = 'inbox_' + Date.now().toString(36);
+      const newItem = {
+        id: newInboxId,
+        type: currentInboxType,
+        content: content,
+        fileUrl: fileUrl,
+        date: "Just now",
+        timestamp: Date.now()
+      };
+      inboxItems.unshift(newItem);
+      inboxCollection.doc(newInboxId).set(newItem).catch(() => {});
+      saveData();
+      document.getElementById('inboxRawInput').value = '';
+      document.getElementById('inboxFileInput').value = '';
+      renderInboxList();
+      showToast("Dropped into quick inbox");
+    }
+
+    function deleteInboxItem(id) {
+      inboxItems = inboxItems.filter(i => i.id !== id);
+      inboxCollection.doc(id).delete().catch(() => {});
+      saveData();
+      renderInboxList();
+      showToast("Inbox entry dismissed");
+    }
+
+    function openConvertModal(inboxId) {
+      const inboxObj = inboxItems.find(i => i.id === inboxId);
+      if (!inboxObj) return;
+
+      document.getElementById('convertInboxId').value = inboxId;
+      document.getElementById('convertInboxPreview').innerHTML = `
+        <strong>Type:</strong> ${inboxObj.type.toUpperCase()}<br/>
+        <strong>Content:</strong> ${escapeHtml(inboxObj.content || '(File Attached)')}
+      `;
+
+      const select = document.getElementById('convertSelectTargetItem');
+      select.innerHTML = items.map(it => `<option value="${it.id}">${escapeHtml(it.title)}</option>`).join('');
+
+      openModal('modalConvertInbox');
+    }
+
+    function convertInboxToNewItem() {
+      const inboxId = document.getElementById('convertInboxId').value;
+      const inboxObj = inboxItems.find(i => i.id === inboxId);
+      if (!inboxObj) return;
+
+      const newId = 'item_' + Date.now().toString(36);
+      const title = inboxObj.content ? inboxObj.content.slice(0, 30) : `Item from ${inboxObj.type}`;
+      
+      const newItem = {
+        id: newId,
+        title: title,
+        description: inboxObj.content || "Created from quick inbox",
+        createdAt: "Today",
+        linkedItemIds: [],
+        details: [
+          {
+            id: 'pt_1',
+            category: 'Initial Capture',
+            type: inboxObj.type === 'voice' ? 'voice' : (inboxObj.type === 'image' ? 'image' : 'text'),
+            value: inboxObj.fileUrl || inboxObj.content
+          }
+        ]
+      };
+
+      items.unshift(newItem);
+      saveItemToCloud(newItem);
+      deleteInboxItem(inboxId);
+      closeModal('modalConvertInbox');
+      currentActiveItemId = newId;
+      switchMainTab('detail');
+      showToast("Promoted to full item");
+    }
+
+    function attachInboxToExistingItem() {
+      const inboxId = document.getElementById('convertInboxId').value;
+      const targetId = document.getElementById('convertSelectTargetItem').value;
+      const categoryName = document.getElementById('convertCategoryName').value.trim() || 'Inbox Attachment';
+      const inboxObj = inboxItems.find(i => i.id === inboxId);
+      const targetItem = items.find(it => it.id === targetId);
+
+      if (!inboxObj || !targetItem) return;
+
+      if (!targetItem.details) targetItem.details = [];
+      targetItem.details.push({
+        id: 'pt_' + Date.now().toString(36),
+        category: categoryName,
+        type: inboxObj.type === 'image' ? 'image' : (inboxObj.type === 'voice' ? 'voice' : 'text'),
+        value: inboxObj.fileUrl || inboxObj.content
+      });
+
+      saveItemToCloud(targetItem);
+      deleteInboxItem(inboxId);
+      closeModal('modalConvertInbox');
+      showToast(`Attached to "${targetItem.title}"`);
+    }
+
+    // Export & Import Database JSON
+    function exportDatabaseJSON() {
+      const dataPayload = {
+        exportedAt: new Date().toISOString(),
+        items: items,
+        inbox: inboxItems
+      };
+      const jsonStr = JSON.stringify(dataPayload, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `OmniSync_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("Database file exported!");
+    }
+
+    function importDatabaseJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (Array.isArray(parsed.items)) {
+            parsed.items.forEach(it => saveItemToCloud(it));
+            if (Array.isArray(parsed.inbox)) {
+              parsed.inbox.forEach(ib => inboxCollection.doc(ib.id).set(ib));
+            }
+            showToast("Database uploaded to Cloud!");
+            closeModal('modalSyncBackup');
+          }
+        } catch (err) {
+          showToast("Failed to parse file: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function showConfirmModal(title, desc, onConfirm) {
+      document.getElementById('confirmModalTitle').textContent = title;
+      document.getElementById('confirmModalDesc').textContent = desc;
+      const btn = document.getElementById('btnConfirmProceed');
+      btn.onclick = () => {
+        closeModal('modalConfirm');
+        if (typeof onConfirm === 'function') onConfirm();
+      };
+      openModal('modalConfirm');
+    }
+
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    document.getElementById('directoryOmniSearchInput').addEventListener('input', () => {
+      renderDirectoryList();
+    });
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Register Progressive Web App Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('PWA ServiceWorker active:', reg.scope))
+          .catch(err => console.log('ServiceWorker note:', err));
+      });
+    }
+
+    // Startup
+    window.addEventListener('DOMContentLoaded', () => {
+      startClock();
+      renderDirectoryList();
+    });
+  </script>
+</body>
+</html>
