@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
@@ -7,12 +7,12 @@
 
   <!-- PWA & Mobile Web Meta -->
   <link rel="manifest" href="./manifest.json" />
-  <meta name="theme-color" content="#0284c7" />
+  <meta name="theme-color" content="#090d16" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="OmniSync" />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230284c7'%3E%3Cpath d='M12 2L2 12L12 22L22 12L12 2Z'/%3E%3C/svg%3E" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2338bdf8'%3E%3Cpath d='M12 2L2 12L12 22L22 12L12 2Z'/%3E%3C/svg%3E" />
 
   <!-- Firebase SDKs (Compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -31,12 +31,11 @@
         extend: {
           colors: {
             brand: {
-              50: '#f0f9ff',
-              100: '#e0f2fe',
+              50: '#0c4a6e',
+              100: '#075985',
               500: '#0284c7',
-              600: '#0369a1',
-              700: '#075985',
-              900: '#0c4a6e',
+              600: '#38bdf8',
+              700: '#7dd3fc',
             }
           }
         }
@@ -44,19 +43,23 @@
     };
   </script>
   <style>
+    /* Dark scrollbars */
     ::-webkit-scrollbar {
       width: 5px;
       height: 5px;
     }
     ::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.02);
+      background: #090d16;
     }
     ::-webkit-scrollbar-thumb {
-      background: rgba(100, 116, 139, 0.25);
+      background: #334155;
       border-radius: 999px;
     }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
     .pb-safe {
-      padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+      padding-bottom: calc(5.8rem + env(safe-area-inset-bottom, 0px));
     }
     .no-scrollbar::-webkit-scrollbar {
       display: none;
@@ -65,75 +68,84 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
+    /* Smooth modal transition */
+    .modal-backdrop {
+      background-color: rgba(3, 7, 18, 0.82);
+      backdrop-filter: blur(6px);
+    }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex justify-center selection:bg-sky-500 selection:text-white">
+<body class="bg-slate-950 text-slate-100 antialiased min-h-screen flex justify-center selection:bg-sky-500 selection:text-white">
 
-  <!-- AUTH LOCK SCREEN (Private Access Guard) -->
-  <div id="auth-lock-screen" class="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-md flex flex-col items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-2xl max-w-sm w-full text-center border border-slate-200">
-      <div class="w-16 h-16 bg-gradient-to-tr from-sky-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl mx-auto mb-4 shadow-lg shadow-sky-500/30">
+  <!-- ========================================================= -->
+  <!-- AUTH LOCK SCREEN (Dark Themed Private Access Guard)        -->
+  <!-- ========================================================= -->
+  <div id="auth-lock-screen" class="fixed inset-0 z-50 modal-backdrop flex flex-col items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl max-w-sm w-full text-center border border-slate-800">
+      <div class="w-16 h-16 bg-gradient-to-tr from-sky-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl mx-auto mb-4 shadow-lg shadow-sky-500/20">
         <i class="fa-solid fa-lock"></i>
       </div>
-      <h2 class="text-xl font-bold text-slate-900 mb-1">OmniSync Directory</h2>
-      <p class="text-xs text-slate-500 mb-5">Single-user protected directory. Sign in with your Google account to sync live across devices.</p>
+      <h2 class="text-xl font-bold text-white mb-1">OmniSync Directory</h2>
+      <p class="text-xs text-slate-400 mb-5">Single-user protected directory. Sign in to sync live across all your devices.</p>
       
-      <button onclick="loginWithGoogle()" class="w-full flex items-center justify-center space-x-2.5 py-3 px-4 bg-sky-600 hover:bg-sky-700 active:scale-95 text-white rounded-xl font-semibold text-sm transition shadow-md shadow-sky-500/20">
+      <button onclick="loginWithGoogle()" class="w-full flex items-center justify-center space-x-2.5 py-3 px-4 bg-sky-600 hover:bg-sky-500 active:scale-95 text-white rounded-xl font-semibold text-sm transition shadow-lg shadow-sky-600/30">
         <i class="fa-brands fa-google text-base"></i>
         <span>Sign in with Google</span>
       </button>
 
-      <div class="mt-4 pt-3 border-t border-slate-100 text-left">
-        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Target Owner Email</label>
+      <div class="mt-5 pt-4 border-t border-slate-800 text-left">
+        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Target Owner Email</label>
         <div class="flex items-center space-x-1.5">
-          <input type="email" id="inputCustomAllowedEmail" placeholder="your-email@gmail.com" class="flex-1 text-xs border border-slate-300 rounded-lg p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none" />
-          <button onclick="saveAllowedEmail()" class="px-2.5 py-2 bg-slate-800 text-white text-xs font-semibold rounded-lg hover:bg-slate-900 transition">Save</button>
+          <input type="email" id="inputCustomAllowedEmail" placeholder="your-email@gmail.com" class="flex-1 text-xs bg-slate-950 border border-slate-700 text-slate-100 rounded-xl p-2.5 focus:ring-2 focus:ring-sky-500 focus:outline-none" />
+          <button onclick="saveAllowedEmail()" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-xl transition border border-slate-700">Save</button>
         </div>
-        <p class="text-[10px] text-slate-400 mt-1">Leaves empty to auto-authorize your first login.</p>
+        <p class="text-[10px] text-slate-500 mt-1.5">Leave blank to auto-authorize your first sign-in.</p>
       </div>
       
-      <p id="auth-error" class="text-rose-600 text-xs font-medium mt-3 hidden bg-rose-50 p-2 rounded-lg border border-rose-200"></p>
+      <p id="auth-error" class="text-rose-400 text-xs font-medium mt-3 hidden bg-rose-950/60 p-2.5 rounded-xl border border-rose-800"></p>
     </div>
   </div>
 
-  <!-- Main Device Shell -->
-  <div id="appContainer" class="w-full max-w-md md:max-w-xl lg:max-w-2xl bg-white shadow-2xl min-h-screen flex flex-col relative border-x border-slate-200">
+  <!-- ========================================================= -->
+  <!-- MAIN DEVICE CONTAINER (Dark Theme Shell)                  -->
+  <!-- ========================================================= -->
+  <div id="appContainer" class="w-full max-w-md md:max-w-xl lg:max-w-2xl bg-slate-900 shadow-2xl min-h-screen flex flex-col relative border-x border-slate-800/80">
     
     <!-- TOP HEADER: LIVE RUNNING DATE & TIME -->
-    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 px-4 sm:px-5 py-3 flex items-center justify-between shadow-xs select-none">
+    <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-5 py-3 flex items-center justify-between shadow-sm select-none">
       <div class="flex items-center space-x-2">
-        <span id="cloudStatusDot" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" title="Cloud Synced"></span>
-        <div id="headerDate" class="text-xs sm:text-sm font-semibold tracking-wide text-slate-700 uppercase">
+        <span id="cloudStatusDot" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50 animate-pulse" title="Cloud Synced"></span>
+        <div id="headerDate" class="text-xs sm:text-sm font-semibold tracking-wide text-slate-300 uppercase">
           --/--/----
         </div>
       </div>
       <div class="flex items-center space-x-2">
-        <div id="headerTime" class="text-xs sm:text-sm font-mono font-bold tracking-wider text-slate-900 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+        <div id="headerTime" class="text-xs sm:text-sm font-mono font-bold tracking-wider text-sky-400 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
           00:00:00 AM
         </div>
-        <button onclick="openModal('modalSyncBackup')" class="p-1.5 text-slate-500 hover:text-sky-600 rounded-lg hover:bg-slate-100 text-sm transition" title="Sync / Profile / Settings">
+        <button onclick="openModal('modalSyncBackup')" class="p-1.5 text-slate-400 hover:text-sky-400 rounded-lg hover:bg-slate-800 text-sm transition" title="Sync / Profile / Settings">
           <i class="fa-solid fa-arrows-rotate"></i>
         </button>
       </div>
     </header>
 
     <!-- Animated Toast Notification -->
-    <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 opacity-0 pointer-events-none transform -translate-y-2 bg-slate-900 text-white text-xs sm:text-sm px-4 py-2 rounded-full shadow-xl flex items-center space-x-2 border border-slate-700">
+    <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 opacity-0 pointer-events-none transform -translate-y-2 bg-slate-800 text-white text-xs sm:text-sm px-4 py-2 rounded-full shadow-2xl flex items-center space-x-2 border border-slate-700">
       <i class="fa-solid fa-circle-check text-emerald-400"></i>
       <span id="toastMsg">Action completed</span>
     </div>
 
     <!-- Confirmation Modal -->
-    <div id="modalConfirm" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
-      <div class="bg-white rounded-2xl max-w-xs w-full p-5 text-center shadow-2xl">
-        <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3 text-lg">
+    <div id="modalConfirm" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xs w-full p-5 text-center shadow-2xl">
+        <div class="w-12 h-12 rounded-full bg-rose-950/80 border border-rose-800 text-rose-400 flex items-center justify-center mx-auto mb-3 text-lg">
           <i class="fa-solid fa-triangle-exclamation"></i>
         </div>
-        <h4 id="confirmModalTitle" class="text-sm font-bold text-slate-900 mb-1">Confirm Action</h4>
-        <p id="confirmModalDesc" class="text-xs text-slate-500 mb-4">Are you sure you want to proceed?</p>
+        <h4 id="confirmModalTitle" class="text-sm font-bold text-white mb-1">Confirm Action</h4>
+        <p id="confirmModalDesc" class="text-xs text-slate-400 mb-4">Are you sure you want to proceed?</p>
         <div class="flex space-x-2">
-          <button onclick="closeModal('modalConfirm')" class="flex-1 py-2 text-xs font-semibold rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Cancel</button>
-          <button id="btnConfirmProceed" class="flex-1 py-2 text-xs font-semibold rounded-xl bg-rose-600 text-white hover:bg-rose-700 transition">Confirm</button>
+          <button onclick="closeModal('modalConfirm')" class="flex-1 py-2 text-xs font-semibold rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Cancel</button>
+          <button id="btnConfirmProceed" class="flex-1 py-2 text-xs font-semibold rounded-xl bg-rose-600 text-white hover:bg-rose-500 transition">Confirm</button>
         </div>
       </div>
     </div>
@@ -141,58 +153,60 @@
     <!-- MAIN CONTENT VIEW AREA -->
     <main class="flex-1 overflow-y-auto pb-safe">
 
-      <!-- SCREEN 1: DEFAULT HOME (Contact Book Directory & Direct Extraction Rosters) -->
+      <!-- ========================================================= -->
+      <!-- SCREEN 1: DEFAULT HOME (Dark Contact Book Directory)      -->
+      <!-- ========================================================= -->
       <section id="viewHome" class="p-4 sm:p-5">
         <div class="flex items-center justify-between mb-3">
           <div>
-            <h1 id="directoryViewTitle" class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Contact Book Directory</h1>
-            <p id="directoryViewSubtitle" class="text-xs text-slate-500 font-medium">All items, media points & multi-way links</p>
+            <h1 id="directoryViewTitle" class="text-xl sm:text-2xl font-bold text-white tracking-tight">Contact Book Directory</h1>
+            <p id="directoryViewSubtitle" class="text-xs text-slate-400 font-medium">All items, media points & multi-way links</p>
           </div>
-          <span id="itemsCounterBadge" class="bg-sky-50 text-sky-700 text-xs font-semibold px-2.5 py-1 rounded-full border border-sky-200 shrink-0">
+          <span id="itemsCounterBadge" class="bg-sky-950/80 text-sky-400 text-xs font-semibold px-2.5 py-1 rounded-full border border-sky-800/80 shrink-0">
             0 Items
           </span>
         </div>
 
         <!-- INTEGRATED OMNI-SEARCH & FILTER BAR -->
-        <div class="mb-4 bg-slate-50/80 p-3 rounded-2xl border border-slate-200 shadow-xs">
+        <div class="mb-4 bg-slate-950/70 p-3 rounded-2xl border border-slate-800 shadow-sm">
           <div class="relative">
-            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-500 text-sm"></i>
             <input 
               type="text" 
               id="directoryOmniSearchInput" 
               placeholder="Search anything: names, labels, phone, email, pdfs, media..." 
-              class="w-full pl-10 pr-9 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition shadow-2xs"
+              class="w-full pl-10 pr-9 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition"
             />
-            <button id="clearSearchBtn" onclick="clearOmniSearch()" class="hidden absolute right-3 top-3 text-slate-400 hover:text-slate-600 text-sm">
+            <button id="clearSearchBtn" onclick="clearOmniSearch()" class="hidden absolute right-3 top-3 text-slate-500 hover:text-slate-300 text-sm">
               <i class="fa-solid fa-circle-xmark"></i>
             </button>
           </div>
 
           <!-- DIRECT EXTRACTION FILTER CHIPS -->
           <div class="flex space-x-1.5 overflow-x-auto pt-2.5 text-xs font-medium no-scrollbar">
-            <button onclick="setOmniFilterType('all')" class="omni-filter-chip px-3 py-1 rounded-full bg-slate-900 text-white shrink-0 transition" data-filter="all">
+            <button onclick="setOmniFilterType('all')" class="omni-filter-chip px-3 py-1 rounded-full bg-sky-600 text-white shrink-0 transition" data-filter="all">
               All Items
             </button>
-            <button onclick="setOmniFilterType('phone')" class="omni-filter-chip px-3 py-1 rounded-full bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 shrink-0 transition" data-filter="phone">
-              <i class="fa-solid fa-phone mr-1 text-[10px] text-emerald-600"></i>Phonebook
+            <button onclick="setOmniFilterType('phone')" class="omni-filter-chip px-3 py-1 rounded-full bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800 shrink-0 transition" data-filter="phone">
+              <i class="fa-solid fa-phone mr-1 text-[10px] text-emerald-400"></i>Phonebook
             </button>
-            <button onclick="setOmniFilterType('email')" class="omni-filter-chip px-3 py-1 rounded-full bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 shrink-0 transition" data-filter="email">
-              <i class="fa-solid fa-envelope mr-1 text-[10px] text-blue-600"></i>Email Directory
+            <button onclick="setOmniFilterType('email')" class="omni-filter-chip px-3 py-1 rounded-full bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800 shrink-0 transition" data-filter="email">
+              <i class="fa-solid fa-envelope mr-1 text-[10px] text-sky-400"></i>Email Directory
             </button>
-            <button onclick="setOmniFilterType('pdf')" class="omni-filter-chip px-3 py-1 rounded-full bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 shrink-0 transition" data-filter="pdf">
-              <i class="fa-solid fa-file-pdf mr-1 text-[10px] text-rose-600"></i>PDFs & Docs
+            <button onclick="setOmniFilterType('pdf')" class="omni-filter-chip px-3 py-1 rounded-full bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800 shrink-0 transition" data-filter="pdf">
+              <i class="fa-solid fa-file-pdf mr-1 text-[10px] text-rose-400"></i>PDFs & Docs
             </button>
-            <button onclick="setOmniFilterType('media')" class="omni-filter-chip px-3 py-1 rounded-full bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 shrink-0 transition" data-filter="media">
-              <i class="fa-solid fa-photo-film mr-1 text-[10px] text-amber-600"></i>Photos & Videos
+            <button onclick="setOmniFilterType('media')" class="omni-filter-chip px-3 py-1 rounded-full bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800 shrink-0 transition" data-filter="media">
+              <i class="fa-solid fa-photo-film mr-1 text-[10px] text-amber-400"></i>Photos & Videos
             </button>
-            <button onclick="setOmniFilterType('connected')" class="omni-filter-chip px-3 py-1 rounded-full bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 shrink-0 transition" data-filter="connected">
-              <i class="fa-solid fa-circle-nodes mr-1 text-[10px] text-indigo-600"></i>Relationship Graph
+            <button onclick="setOmniFilterType('connected')" class="omni-filter-chip px-3 py-1 rounded-full bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800 shrink-0 transition" data-filter="connected">
+              <i class="fa-solid fa-circle-nodes mr-1 text-[10px] text-indigo-400"></i>Relationship Graph
             </button>
           </div>
 
           <!-- DYNAMIC FILTER BY LABEL BAR -->
-          <div class="mt-2.5 pt-2 border-t border-slate-200/70 flex items-center space-x-1.5 overflow-x-auto no-scrollbar">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1">
+          <div class="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center space-x-1.5 overflow-x-auto no-scrollbar">
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider shrink-0 mr-1">
               <i class="fa-solid fa-tags text-[9px] mr-1"></i>Labels:
             </span>
             <div id="dynamicLabelFilterContainer" class="flex items-center space-x-1.5 shrink-0">
@@ -206,53 +220,55 @@
 
         <!-- Empty State -->
         <div id="emptyItemsState" class="hidden text-center py-12 px-4">
-          <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-2xl">
+          <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-500 text-2xl">
             <i class="fa-regular fa-address-book"></i>
           </div>
-          <h3 id="emptyTitle" class="text-sm font-semibold text-slate-700">No Records Found</h3>
+          <h3 id="emptyTitle" class="text-sm font-semibold text-slate-300">No Records Found</h3>
           <p id="emptySub" class="text-xs text-slate-500 mt-1 max-w-xs mx-auto">Try clearing search or switch filters back to 'All Items'.</p>
         </div>
       </section>
 
-      <!-- SCREEN 2: ITEM DETAIL & FULL CONNECTIONS VIEW -->
+      <!-- ========================================================= -->
+      <!-- SCREEN 2: ITEM RECORD PAGE & DETAIL VIEW                   -->
+      <!-- ========================================================= -->
       <section id="viewDetail" class="hidden p-4 sm:p-5">
-        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-200">
-          <button onclick="switchMainTab('home')" class="inline-flex items-center text-xs font-semibold text-slate-600 hover:text-sky-600 transition px-2 py-1.5 rounded-lg hover:bg-slate-100">
+        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+          <button onclick="switchMainTab('home')" class="inline-flex items-center text-xs font-semibold text-slate-300 hover:text-sky-400 transition px-2.5 py-1.5 rounded-lg hover:bg-slate-800">
             <i class="fa-solid fa-arrow-left mr-1.5"></i> Back to Directory
           </button>
           <div class="flex items-center space-x-1.5">
-            <button id="btnEditItem" class="px-2.5 py-1.5 text-slate-600 hover:text-sky-600 hover:bg-slate-100 rounded-lg text-xs font-medium transition">
+            <button id="btnEditItem" class="px-2.5 py-1.5 text-slate-300 hover:text-sky-400 hover:bg-slate-800 rounded-lg text-xs font-medium transition">
               <i class="fa-solid fa-pen mr-1"></i> Edit
             </button>
-            <button id="btnDeleteItem" class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg text-xs transition">
+            <button id="btnDeleteItem" class="p-2 text-rose-400 hover:bg-rose-950/60 rounded-lg text-xs transition">
               <i class="fa-solid fa-trash-can"></i>
             </button>
           </div>
         </div>
 
         <!-- Item Header Card -->
-        <div class="bg-gradient-to-br from-sky-50 via-white to-slate-50 p-4 sm:p-5 rounded-2xl border border-sky-100 mb-5 shadow-xs">
+        <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 p-4 sm:p-5 rounded-2xl border border-slate-800 mb-5 shadow-sm">
           <div>
-            <span class="inline-block text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-sky-600 text-white mb-2">Item Record</span>
-            <h2 id="detailTitle" class="text-xl sm:text-2xl font-bold text-slate-900 leading-snug">Item Title</h2>
-            <p id="detailDescription" class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">Description goes here...</p>
+            <span class="inline-block text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-sky-600 text-white mb-2 shadow-xs">Item Record</span>
+            <h2 id="detailTitle" class="text-xl sm:text-2xl font-bold text-white leading-snug">Item Title</h2>
+            <p id="detailDescription" class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">Description goes here...</p>
           </div>
-          <div class="mt-4 pt-3 border-t border-sky-100 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-            <span>Created: <span id="detailDate">Today</span></span>
-            <span>ID: <span id="detailId">#000</span></span>
+          <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500 font-mono">
+            <span>Created: <span id="detailDate" class="text-slate-400">Today</span></span>
+            <span>ID: <span id="detailId" class="text-slate-400">#000</span></span>
           </div>
         </div>
 
         <!-- Mutual Connected Items -->
-        <div class="mb-6 bg-slate-50/70 p-4 rounded-2xl border border-slate-200">
+        <div class="mb-6 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
           <div class="flex items-center justify-between mb-2.5">
             <div>
-              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center">
-                <i class="fa-solid fa-diagram-project mr-1.5 text-indigo-600"></i> Connected Items (Mutual / All-Sides)
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center">
+                <i class="fa-solid fa-diagram-project mr-1.5 text-indigo-400"></i> Connected Items (Mutual / All-Sides)
               </h3>
-              <p class="text-[10px] text-slate-400 mt-0.5">Connected items automatically link back to this item</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">Connected items automatically link back to this item</p>
             </div>
-            <button id="btnOpenConnectModal" class="inline-flex items-center text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-lg hover:bg-indigo-100 transition shadow-2xs">
+            <button id="btnOpenConnectModal" class="inline-flex items-center text-xs font-semibold text-indigo-400 bg-indigo-950/60 border border-indigo-800 px-2.5 py-1 rounded-lg hover:bg-indigo-900 transition">
               <i class="fa-solid fa-link mr-1"></i> Manage Links
             </button>
           </div>
@@ -263,12 +279,12 @@
         <div>
           <div class="flex items-center justify-between mb-3">
             <div>
-              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center">
-                <i class="fa-solid fa-list-check mr-1.5 text-sky-600"></i> Details & Media Points
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center">
+                <i class="fa-solid fa-list-check mr-1.5 text-sky-400"></i> Details & Media Points
               </h3>
-              <p class="text-[10px] text-slate-400 mt-0.5">Categorized text, contacts, media & documents</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">Categorized text, contacts, media & documents</p>
             </div>
-            <button id="btnOpenAddDetailModal" class="inline-flex items-center text-xs font-semibold bg-sky-600 text-white px-3.5 py-2 rounded-xl hover:bg-sky-700 transition shadow-xs">
+            <button id="btnOpenAddDetailModal" class="inline-flex items-center text-xs font-semibold bg-sky-600 hover:bg-sky-500 text-white px-3.5 py-2 rounded-xl transition shadow-md shadow-sky-600/30">
               <i class="fa-solid fa-plus mr-1.5"></i> Add Point
             </button>
           </div>
@@ -276,63 +292,65 @@
         </div>
       </section>
 
-      <!-- SCREEN 3: LEFT TAB - QUICK ADD INBOX -->
+      <!-- ========================================================= -->
+      <!-- SCREEN 3: LEFT TAB - QUICK ADD INBOX                      -->
+      <!-- ========================================================= -->
       <section id="viewInbox" class="hidden p-4 sm:p-5">
         <div class="mb-4">
           <div class="flex items-center space-x-2">
-            <svg class="w-5 h-5 text-sky-600" viewBox="0 0 24 24" fill="currentColor">
+            <svg class="w-5 h-5 text-sky-400" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2L2 12L12 22L22 12L12 2Z" />
             </svg>
-            <h1 class="text-xl font-bold text-slate-900">Quick Media Inbox</h1>
+            <h1 class="text-xl font-bold text-white">Quick Media Inbox</h1>
           </div>
-          <p class="text-xs text-slate-500 mt-0.5">Temporary inbox for raw media, quick notes, and files before organizing.</p>
+          <p class="text-xs text-slate-400 mt-0.5">Temporary inbox for raw media, quick notes, and files before organizing.</p>
         </div>
 
         <!-- Quick Capture Form Card -->
-        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs mb-5">
-          <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Capture Anything Now</h4>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm mb-5">
+          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Capture Anything Now</h4>
           
           <div class="grid grid-cols-4 gap-2 mb-3">
-            <button onclick="setInboxType('note')" id="inboxTypeNote" class="inbox-type-btn py-2 px-1 text-xs rounded-xl border border-sky-500 bg-sky-50 text-sky-700 font-medium flex flex-col items-center">
+            <button onclick="setInboxType('note')" id="inboxTypeNote" class="inbox-type-btn py-2 px-1 text-xs rounded-xl border border-sky-500 bg-sky-950/60 text-sky-300 font-medium flex flex-col items-center">
               <i class="fa-solid fa-pen-nib mb-1 text-sm"></i> Note
             </button>
-            <button onclick="setInboxType('image')" id="inboxTypeImage" class="inbox-type-btn py-2 px-1 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-medium flex flex-col items-center hover:bg-slate-100">
+            <button onclick="setInboxType('image')" id="inboxTypeImage" class="inbox-type-btn py-2 px-1 text-xs rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-medium flex flex-col items-center hover:bg-slate-800">
               <i class="fa-solid fa-camera mb-1 text-sm"></i> Image
             </button>
-            <button onclick="setInboxType('voice')" id="inboxTypeVoice" class="inbox-type-btn py-2 px-1 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-medium flex flex-col items-center hover:bg-slate-100">
+            <button onclick="setInboxType('voice')" id="inboxTypeVoice" class="inbox-type-btn py-2 px-1 text-xs rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-medium flex flex-col items-center hover:bg-slate-800">
               <i class="fa-solid fa-microphone mb-1 text-sm"></i> Voice
             </button>
-            <button onclick="setInboxType('file')" id="inboxTypeFile" class="inbox-type-btn py-2 px-1 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-medium flex flex-col items-center hover:bg-slate-100">
+            <button onclick="setInboxType('file')" id="inboxTypeFile" class="inbox-type-btn py-2 px-1 text-xs rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-medium flex flex-col items-center hover:bg-slate-800">
               <i class="fa-solid fa-paperclip mb-1 text-sm"></i> File/PDF
             </button>
           </div>
 
           <div class="space-y-2">
-            <textarea id="inboxRawInput" rows="2" placeholder="Jot down a quick thought, link, or phone number..." class="w-full text-xs sm:text-sm p-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"></textarea>
+            <textarea id="inboxRawInput" rows="2" placeholder="Jot down a quick thought, link, or phone number..." class="w-full text-xs sm:text-sm p-3 bg-slate-950 border border-slate-800 text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"></textarea>
 
-            <div id="inboxFileUploadRow" class="hidden border-2 border-dashed border-slate-200 rounded-xl p-3 text-center bg-slate-50">
-              <input type="file" id="inboxFileInput" class="text-xs file:mr-2 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-sky-100 file:text-sky-700 hover:file:bg-sky-200" />
-              <p class="text-[10px] text-slate-400 mt-1">Photos, Videos, Audio, PDFs & Documents</p>
+            <div id="inboxFileUploadRow" class="hidden border-2 border-dashed border-slate-800 rounded-xl p-3 text-center bg-slate-950">
+              <input type="file" id="inboxFileInput" class="text-xs file:mr-2 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-sky-600 file:text-white hover:file:bg-sky-500" />
+              <p class="text-[10px] text-slate-500 mt-1">Photos, Videos, Audio, PDFs & Documents</p>
             </div>
 
-            <div id="inboxVoiceRow" class="hidden flex items-center justify-between bg-amber-50 border border-amber-200 p-2.5 rounded-xl">
-              <span id="voiceStatus" class="text-xs text-amber-800 font-medium">Ready to record memo</span>
-              <button id="btnRecordVoice" class="bg-amber-600 text-white text-xs px-3 py-1.5 rounded-lg font-semibold hover:bg-amber-700 transition flex items-center space-x-1.5">
+            <div id="inboxVoiceRow" class="hidden flex items-center justify-between bg-amber-950/40 border border-amber-900/60 p-2.5 rounded-xl">
+              <span id="voiceStatus" class="text-xs text-amber-300 font-medium">Ready to record memo</span>
+              <button id="btnRecordVoice" class="bg-amber-600 text-white text-xs px-3 py-1.5 rounded-lg font-semibold hover:bg-amber-500 transition flex items-center space-x-1.5">
                 <i class="fa-solid fa-circle text-[9px] text-red-300 animate-pulse"></i>
                 <span>Simulate Record (3s)</span>
               </button>
             </div>
           </div>
 
-          <button id="btnSaveToInbox" class="w-full mt-3 bg-slate-900 text-white text-xs sm:text-sm font-semibold py-2.5 rounded-xl hover:bg-slate-800 transition shadow-xs">
+          <button id="btnSaveToInbox" class="w-full mt-3 bg-sky-600 hover:bg-sky-500 text-white text-xs sm:text-sm font-semibold py-2.5 rounded-xl transition shadow-md shadow-sky-600/20">
             Drop into Inbox
           </button>
         </div>
 
         <div>
           <div class="flex items-center justify-between mb-2">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Unsorted Items (<span id="inboxCount">0</span>)</h3>
-            <span class="text-[10px] text-slate-400">Temporary storage until assigned</span>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Unsorted Items (<span id="inboxCount">0</span>)</h3>
+            <span class="text-[10px] text-slate-500">Temporary storage until assigned</span>
           </div>
           <div id="inboxListContainer" class="space-y-2.5"></div>
         </div>
@@ -340,37 +358,39 @@
 
     </main>
 
+    <!-- ========================================================= -->
     <!-- BOTTOM NAVIGATION TABS (Strictly matching User Wireframe) -->
-    <nav class="fixed md:absolute bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-300 py-2.5 px-6 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] flex items-center justify-around">
+    <!-- ========================================================= -->
+    <nav class="fixed md:absolute bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 py-2.5 px-6 shadow-[0_-4px_25px_rgba(0,0,0,0.5)] flex items-center justify-around">
 
       <!-- LEFT TAB: DIAMOND (Quick Add) -->
-      <button id="navTabLeft" onclick="switchMainTab('inbox')" class="group flex flex-col items-center justify-center p-1 text-slate-500 hover:text-sky-600 transition focus:outline-none">
-        <div class="w-11 h-11 flex items-center justify-center rounded-xl group-hover:bg-sky-50 transition">
+      <button id="navTabLeft" onclick="switchMainTab('inbox')" class="group flex flex-col items-center justify-center p-1 text-slate-400 hover:text-sky-400 transition focus:outline-none">
+        <div class="w-11 h-11 flex items-center justify-center rounded-xl group-hover:bg-slate-800 transition">
           <svg class="w-7 h-7 transform rotate-45 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <rect x="4" y="4" width="16" height="16" rx="2" />
           </svg>
         </div>
-        <span class="text-[10px] font-bold tracking-tight uppercase mt-0.5 text-slate-600 group-hover:text-sky-600">Quick Add</span>
+        <span class="text-[10px] font-bold tracking-tight uppercase mt-0.5 text-slate-400 group-hover:text-sky-400">Quick Add</span>
       </button>
 
       <!-- CENTER TAB: 4-POINT STAR (Add Structured Item) -->
       <button id="navTabCenter" onclick="openCreateItemModal()" class="group flex flex-col items-center justify-center -mt-5 p-1 focus:outline-none">
-        <div class="w-14 h-14 bg-gradient-to-tr from-sky-600 to-sky-400 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-sky-500/30 ring-4 ring-white group-hover:scale-105 active:scale-95 transition-all">
+        <div class="w-14 h-14 bg-gradient-to-tr from-sky-600 to-sky-400 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-sky-500/40 ring-4 ring-slate-900 group-hover:scale-105 active:scale-95 transition-all">
           <svg class="w-8 h-8 transition-transform group-hover:rotate-12" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 1L14.7 9.3L23 12L14.7 14.7L12 23L9.3 14.7L1 12L9.3 9.3L12 1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
           </svg>
         </div>
-        <span class="text-[10px] font-bold tracking-tight uppercase mt-1 text-sky-700">Add Item</span>
+        <span class="text-[10px] font-bold tracking-tight uppercase mt-1 text-sky-400">Add Item</span>
       </button>
 
       <!-- RIGHT TAB: HEXAGON (Home - Returns to default view) -->
-      <button id="navTabRight" onclick="goToHomeDefault()" class="group flex flex-col items-center justify-center p-1 text-sky-600 transition focus:outline-none">
-        <div class="w-11 h-11 flex items-center justify-center rounded-xl group-hover:bg-sky-50 transition">
+      <button id="navTabRight" onclick="goToHomeDefault()" class="group flex flex-col items-center justify-center p-1 text-sky-400 transition focus:outline-none">
+        <div class="w-11 h-11 flex items-center justify-center rounded-xl group-hover:bg-slate-800 transition">
           <svg class="w-7 h-7 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="12,2 21,7.5 21,17.5 12,23 3,17.5 3,7.5" />
           </svg>
         </div>
-        <span class="text-[10px] font-bold tracking-tight uppercase mt-0.5 text-sky-700">Home</span>
+        <span class="text-[10px] font-bold tracking-tight uppercase mt-0.5 text-sky-400">Home</span>
       </button>
 
     </nav>
@@ -378,14 +398,14 @@
     <!-- ========================================================= -->
     <!-- MODAL 1: CREATE OR EDIT STRUCTURED ITEM                    -->
     <!-- ========================================================= -->
-    <div id="modalItem" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
-      <div class="bg-white rounded-3xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
-        <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+    <div id="modalItem" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-3 sm:p-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
+        <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
           <div>
-            <h3 id="modalItemHeaderTitle" class="text-base sm:text-lg font-bold text-slate-900">Create New Item</h3>
-            <p class="text-xs text-slate-500">Define the title, description, and mutual connections</p>
+            <h3 id="modalItemHeaderTitle" class="text-base sm:text-lg font-bold text-white">Create New Item</h3>
+            <p class="text-xs text-slate-400">Define the title, description, and mutual connections</p>
           </div>
-          <button onclick="closeModal('modalItem')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 text-sm">
+          <button onclick="closeModal('modalItem')" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 text-sm">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
@@ -394,24 +414,24 @@
           <input type="hidden" id="editItemId" value="" />
           
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Item Title / Name *</label>
-            <input type="text" id="inputItemTitle" placeholder="e.g., Item A - Project Phoenix" class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none" />
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">Item Title / Name *</label>
+            <input type="text" id="inputItemTitle" placeholder="e.g., Item A - Project Phoenix" class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-950 border border-slate-800 text-slate-100 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none" />
           </div>
 
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">General Description</label>
-            <textarea id="inputItemDesc" rows="2" placeholder="Summary or overview of this item..." class="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none"></textarea>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">General Description</label>
+            <textarea id="inputItemDesc" rows="2" placeholder="Summary or overview of this item..." class="w-full px-3.5 py-2 text-xs sm:text-sm bg-slate-950 border border-slate-800 text-slate-100 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none"></textarea>
           </div>
 
           <!-- CONNECTED ITEMS WITH ON-THE-FLY CREATION -->
-          <div class="border border-slate-200 rounded-2xl p-3.5 bg-slate-50/70">
+          <div class="border border-slate-800 rounded-2xl p-3.5 bg-slate-950/60">
             <div class="flex items-center justify-between mb-1.5">
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-200">
                 Connected Items (Mutual Linking)
               </label>
-              <span class="text-[10px] text-indigo-600 font-semibold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">All-Sides Sync</span>
+              <span class="text-[10px] text-indigo-400 font-semibold bg-indigo-950/80 px-2 py-0.5 rounded border border-indigo-800">All-Sides Sync</span>
             </div>
-            <p class="text-[11px] text-slate-500 mb-2.5">
+            <p class="text-[11px] text-slate-400 mb-2.5">
               Select existing items OR type a brand new item name below to create and link immediately:
             </p>
 
@@ -420,27 +440,27 @@
                 type="text" 
                 id="inputQuickNewConnectedItem" 
                 placeholder="Type new item name (e.g. Item E - Legal)..." 
-                class="flex-1 px-3 py-2 text-xs border border-indigo-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                class="flex-1 px-3 py-2 text-xs bg-slate-900 border border-slate-700 text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
               <button 
                 type="button" 
                 onclick="quickCreateAndLinkNewItem('modal')" 
-                class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center space-x-1 shrink-0"
+                class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center space-x-1 shrink-0"
               >
                 <i class="fa-solid fa-plus text-[10px]"></i>
                 <span>Add & Link</span>
               </button>
             </div>
 
-            <div id="linkSelectorContainer" class="max-h-36 overflow-y-auto border border-slate-200 rounded-xl p-2 space-y-1 bg-white"></div>
+            <div id="linkSelectorContainer" class="max-h-36 overflow-y-auto border border-slate-800 rounded-xl p-2 space-y-1 bg-slate-900"></div>
           </div>
         </div>
 
-        <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end space-x-2">
-          <button onclick="closeModal('modalItem')" class="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-xl transition">
+        <div class="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-end space-x-2">
+          <button onclick="closeModal('modalItem')" class="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-300 hover:bg-slate-800 rounded-xl transition">
             Cancel
           </button>
-          <button id="btnSaveItemSubmit" onclick="saveItemRecord()" class="px-5 py-2 text-xs sm:text-sm font-semibold bg-sky-600 text-white rounded-xl hover:bg-sky-700 transition shadow-xs">
+          <button id="btnSaveItemSubmit" onclick="saveItemRecord()" class="px-5 py-2 text-xs sm:text-sm font-semibold bg-sky-600 hover:bg-sky-500 text-white rounded-xl transition shadow-md shadow-sky-600/30">
             Save Item
           </button>
         </div>
@@ -448,32 +468,32 @@
     </div>
 
     <!-- ========================================================= -->
-    <!-- MODAL 2: REDESIGNED DETAIL POINT CREATOR (TEXT OR MEDIA)   -->
+    <!-- MODAL 2: ADD DETAIL POINT (Dark Theme & Auto-Dismissal)    -->
     <!-- ========================================================= -->
-    <div id="modalDetailPoint" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
-      <div class="bg-white rounded-3xl w-full max-w-md max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
-        <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+    <div id="modalDetailPoint" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-3 sm:p-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
+        <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
           <div>
-            <h3 class="text-base font-bold text-slate-900">Add Detail Point</h3>
-            <p class="text-xs text-slate-500">Choose mode, select or add label, and provide content</p>
+            <h3 class="text-base font-bold text-white">Add Detail Point</h3>
+            <p class="text-xs text-slate-400">Choose mode, select or add label, and provide content</p>
           </div>
-          <button onclick="closeModal('modalDetailPoint')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 text-sm">
+          <button onclick="closeModal('modalDetailPoint')" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 text-sm">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
 
         <div class="p-5 overflow-y-auto space-y-4">
-          <!-- 1. DETAIL TYPE SELECTOR: 2 STREAMLINED MODES (TEXT vs MEDIA) -->
+          <!-- 1. DETAIL TYPE SELECTOR: 2 MODES (TEXT vs MEDIA) -->
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
               Detail Type *
             </label>
-            <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+            <div class="grid grid-cols-2 gap-2 bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
               <button 
                 type="button" 
                 id="btnModeText" 
                 onclick="setDetailMode('text')" 
-                class="py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-xs bg-white text-sky-700 border border-sky-200"
+                class="py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-xs bg-slate-800 text-sky-400 border border-slate-700"
               >
                 <i class="fa-solid fa-align-left text-sm"></i>
                 <span>Text Mode</span>
@@ -482,13 +502,13 @@
                 type="button" 
                 id="btnModeMedia" 
                 onclick="setDetailMode('media')" 
-                class="py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 transition text-slate-600 hover:text-slate-900"
+                class="py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 transition text-slate-400 hover:text-slate-200"
               >
                 <i class="fa-solid fa-photo-film text-sm"></i>
                 <span>Media Mode</span>
               </button>
             </div>
-            <p id="modeHelperText" class="text-[11px] text-slate-400 mt-1.5">
+            <p id="modeHelperText" class="text-[11px] text-slate-500 mt-1.5">
               Enter notes, description, phone numbers, or emails. Action buttons will be auto-generated.
             </p>
           </div>
@@ -496,10 +516,10 @@
           <!-- 2. DYNAMIC GLOBAL LABEL SYSTEM -->
           <div>
             <div class="flex items-center justify-between mb-1.5">
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-300">
                 Point Label *
               </label>
-              <span class="text-[10px] text-sky-600 font-semibold bg-sky-50 px-2 py-0.5 rounded border border-sky-100">
+              <span class="text-[10px] text-sky-400 font-semibold bg-sky-950/80 px-2 py-0.5 rounded border border-sky-800">
                 Saved Globally
               </span>
             </div>
@@ -509,7 +529,7 @@
               <select 
                 id="selectGlobalLabel" 
                 onchange="handleSelectExistingLabel(this.value)" 
-                class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none bg-slate-50 font-medium text-slate-700"
+                class="w-full px-3 py-2 text-xs border border-slate-800 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none bg-slate-950 font-medium text-slate-200"
               >
                 <option value="">-- Choose from existing labels --</option>
               </select>
@@ -521,12 +541,12 @@
                 type="text" 
                 id="inputPointLabel" 
                 placeholder="Or type a brand new label..." 
-                class="flex-1 px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none" 
+                class="flex-1 px-3.5 py-2 text-xs sm:text-sm bg-slate-950 border border-slate-800 text-slate-100 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none" 
               />
               <button 
                 type="button" 
                 onclick="saveCustomLabelGlobally()" 
-                class="px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition shadow-xs shrink-0 flex items-center space-x-1"
+                class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition border border-slate-700 shrink-0 flex items-center space-x-1"
                 title="Add to library"
               >
                 <i class="fa-solid fa-plus text-[10px]"></i>
@@ -536,95 +556,94 @@
 
             <!-- Interactive Label Chips Pool -->
             <div class="mt-2 pt-1">
-              <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block mb-1">Quick Select Label:</span>
-              <div id="modalLabelChipsContainer" class="flex flex-wrap gap-1 max-h-24 overflow-y-auto no-scrollbar pt-0.5">
-                <!-- Dynamically rendered -->
-              </div>
+              <span class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider block mb-1">Quick Select Label:</span>
+              <div id="modalLabelChipsContainer" class="flex flex-wrap gap-1 max-h-24 overflow-y-auto no-scrollbar pt-0.5"></div>
             </div>
           </div>
 
           <!-- 3. MAIN INPUT: TEXT MODE CONTENT -->
           <div id="containerTextModeInput">
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
               Text Content / Note / Details *
             </label>
             <textarea 
               id="inputPointTextContent" 
               rows="3" 
               placeholder="Type description, phone number (+91...), email, address, or points..." 
-              class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none"
+              class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-950 border border-slate-800 text-slate-100 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none"
             ></textarea>
             <div class="mt-1 flex items-center space-x-2 text-[10px] text-slate-400">
-              <span><i class="fa-solid fa-magic mr-1 text-sky-500"></i> Auto-detects Phone & Email for 1-tap Call & WhatsApp</span>
+              <span><i class="fa-solid fa-magic mr-1 text-sky-400"></i> Auto-detects Phone & Email for 1-tap Call & WhatsApp</span>
             </div>
           </div>
 
           <!-- 4. MAIN INPUT: MEDIA MODE (UPLOAD OR URL) -->
           <div id="containerMediaModeInput" class="hidden space-y-3">
             <div>
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
                 Attach Media File (Photo, Video, PDF, Voice, Doc)
               </label>
-              <div class="border-2 border-dashed border-sky-200 rounded-2xl p-4 bg-sky-50/50 text-center">
+              <div class="border-2 border-dashed border-slate-800 rounded-2xl p-4 bg-slate-950 text-center">
                 <input 
                   type="file" 
                   id="inputUniversalMediaFile" 
                   onchange="handleMediaModeFileUpload(event)" 
-                  class="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-sky-600 file:text-white hover:file:bg-sky-700 cursor-pointer" 
+                  class="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-sky-600 file:text-white hover:file:bg-sky-500 cursor-pointer" 
                 />
-                <p class="text-[10px] text-slate-400 mt-1.5">Images (JPG, PNG), Videos (MP4), PDFs, Audio (MP3, WAV) & Docs</p>
+                <p class="text-[10px] text-slate-500 mt-1.5">Images (JPG, PNG), Videos (MP4), PDFs, Audio & Docs</p>
               </div>
             </div>
 
             <!-- Optional Web URL Alternative -->
             <div>
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
                 Or Paste Web Media Link (URL)
               </label>
               <input 
                 type="url" 
                 id="inputMediaUrl" 
                 placeholder="https://example.com/file.pdf or video url..." 
-                class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-1 focus:ring-sky-500 focus:outline-none" 
+                class="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-800 text-slate-100 rounded-xl focus:ring-1 focus:ring-sky-500 focus:outline-none" 
               />
             </div>
 
             <!-- Optional Media Note / Caption -->
             <div>
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
                 Media Caption / Notes (Optional)
               </label>
               <input 
                 type="text" 
                 id="inputMediaCaption" 
                 placeholder="Brief notes about this attachment..." 
-                class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-1 focus:ring-sky-500 focus:outline-none" 
+                class="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-800 text-slate-100 rounded-xl focus:ring-1 focus:ring-sky-500 focus:outline-none" 
               />
             </div>
 
             <!-- Attached Media Preview Card -->
-            <div id="mediaModePreviewCard" class="hidden p-3 bg-white border border-slate-200 rounded-2xl flex items-center justify-between shadow-xs">
+            <div id="mediaModePreviewCard" class="hidden p-3 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between shadow-xs">
               <div class="flex items-center space-x-2.5 min-w-0">
-                <div id="mediaModePreviewIcon" class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-sm shrink-0 border border-sky-100">
+                <div id="mediaModePreviewIcon" class="w-10 h-10 rounded-xl bg-slate-800 text-sky-400 flex items-center justify-center text-sm shrink-0 border border-slate-700">
                   <i class="fa-solid fa-file"></i>
                 </div>
                 <div class="min-w-0">
-                  <p id="mediaModePreviewName" class="text-xs font-bold text-slate-800 truncate">document.pdf</p>
-                  <span id="mediaModePreviewType" class="text-[10px] text-slate-400 uppercase font-semibold">PDF File</span>
+                  <p id="mediaModePreviewName" class="text-xs font-bold text-slate-200 truncate">document.pdf</p>
+                  <span id="mediaModePreviewType" class="text-[10px] text-slate-500 uppercase font-semibold">PDF File</span>
                 </div>
               </div>
-              <button type="button" onclick="clearMediaModeUpload()" class="p-1.5 text-slate-400 hover:text-rose-500 text-xs">
+              <button type="button" onclick="clearMediaModeUpload()" class="p-1.5 text-slate-400 hover:text-rose-400 text-xs">
                 <i class="fa-solid fa-trash-can"></i>
               </button>
             </div>
           </div>
         </div>
 
-        <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end space-x-2">
-          <button onclick="closeModal('modalDetailPoint')" class="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-xl transition">
+        <!-- MODAL ACTIONS: Closes and brings you right back to item record -->
+        <div class="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-end space-x-2">
+          <button onclick="closeModal('modalDetailPoint')" class="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-400 hover:bg-slate-800 rounded-xl transition">
             Cancel
           </button>
-          <button onclick="saveDetailPoint()" class="px-5 py-2 text-xs sm:text-sm font-semibold bg-sky-600 text-white rounded-xl hover:bg-sky-700 transition shadow-xs flex items-center space-x-1.5">
+          <button onclick="saveDetailPoint()" class="px-5 py-2 text-xs sm:text-sm font-semibold bg-sky-600 hover:bg-sky-500 text-white rounded-xl transition shadow-md shadow-sky-600/30 flex items-center space-x-1.5">
             <i class="fa-solid fa-check text-xs"></i>
             <span>Add Point</span>
           </button>
@@ -633,24 +652,24 @@
     </div>
 
     <!-- MODAL 3: DIRECT MANAGE CONNECTIONS -->
-    <div id="modalManageConnections" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
-      <div class="bg-white rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
-        <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+    <div id="modalManageConnections" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-3 sm:p-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+        <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
           <div>
-            <h3 class="text-base font-bold text-slate-900">Manage Mutual Connections</h3>
-            <p class="text-xs text-slate-500">Links are bi-directional across all sides</p>
+            <h3 class="text-base font-bold text-white">Manage Mutual Connections</h3>
+            <p class="text-xs text-slate-400">Links are bi-directional across all sides</p>
           </div>
-          <button onclick="closeModal('modalManageConnections')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 text-sm">
+          <button onclick="closeModal('modalManageConnections')" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 text-sm">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
 
         <div class="p-5 overflow-y-auto space-y-4">
-          <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-3.5">
-            <label class="block text-xs font-bold text-indigo-900 uppercase tracking-wider mb-1">
+          <div class="bg-indigo-950/40 border border-indigo-900/60 rounded-2xl p-3.5">
+            <label class="block text-xs font-bold text-indigo-300 uppercase tracking-wider mb-1">
               Add Non-Existing Item & Link
             </label>
-            <p class="text-[11px] text-indigo-700 mb-2">
+            <p class="text-[11px] text-indigo-400 mb-2">
               Creates a brand new item in the database and immediately connects both sides:
             </p>
             <div class="flex space-x-2">
@@ -658,12 +677,12 @@
                 type="text" 
                 id="inputQuickNewItemInDetail" 
                 placeholder="e.g. Item X - Supplier..." 
-                class="flex-1 px-3 py-2 text-xs border border-indigo-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                class="flex-1 px-3 py-2 text-xs bg-slate-950 border border-indigo-800 text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
               <button 
                 type="button" 
                 onclick="quickCreateAndLinkNewItem('detail')" 
-                class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition shadow-xs shrink-0"
+                class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-xs shrink-0"
               >
                 + Create & Link
               </button>
@@ -671,44 +690,44 @@
           </div>
 
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
               Connect with Existing Items
             </label>
-            <div id="directConnectionCheckboxContainer" class="max-h-56 overflow-y-auto border border-slate-200 rounded-xl p-2 space-y-1 bg-slate-50"></div>
+            <div id="directConnectionCheckboxContainer" class="max-h-56 overflow-y-auto border border-slate-800 rounded-xl p-2 space-y-1 bg-slate-950"></div>
           </div>
         </div>
 
-        <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end space-x-2">
-          <button onclick="closeModal('modalManageConnections')" class="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-xl">Cancel</button>
-          <button onclick="saveDirectConnections()" class="px-5 py-2 text-xs sm:text-sm font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition shadow-xs">Save Connections</button>
+        <div class="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-end space-x-2">
+          <button onclick="closeModal('modalManageConnections')" class="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-400 hover:bg-slate-800 rounded-xl">Cancel</button>
+          <button onclick="saveDirectConnections()" class="px-5 py-2 text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition shadow-xs">Save Connections</button>
         </div>
       </div>
     </div>
 
     <!-- MODAL 4: CONVERT INBOX ITEM -->
-    <div id="modalConvertInbox" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
-      <div class="bg-white rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
-        <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
-          <h3 class="text-base font-bold text-slate-900">Organize Unsorted Media</h3>
-          <button onclick="closeModal('modalConvertInbox')" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-sm">
+    <div id="modalConvertInbox" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-3 sm:p-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+        <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+          <h3 class="text-base font-bold text-white">Organize Unsorted Media</h3>
+          <button onclick="closeModal('modalConvertInbox')" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-300 text-sm">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
         <div class="p-5 space-y-4">
           <input type="hidden" id="convertInboxId" />
-          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700" id="convertInboxPreview"></div>
+          <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-300" id="convertInboxPreview"></div>
 
           <div class="space-y-2">
-            <button onclick="convertInboxToNewItem()" class="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs sm:text-sm rounded-xl transition flex items-center justify-center space-x-2">
+            <button onclick="convertInboxToNewItem()" class="w-full py-3 px-4 bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs sm:text-sm rounded-xl transition flex items-center justify-center space-x-2">
               <i class="fa-solid fa-folder-plus"></i>
               <span>Create As Brand New Item</span>
             </button>
-            <div class="text-center text-[11px] text-slate-400 font-bold uppercase">— OR —</div>
+            <div class="text-center text-[11px] text-slate-500 font-bold uppercase">— OR —</div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Attach to an Existing Item</label>
-              <select id="convertSelectTargetItem" class="w-full text-xs p-2.5 border border-slate-200 rounded-xl bg-white mb-2"></select>
-              <input type="text" id="convertCategoryName" placeholder="Searchable label / category" class="w-full text-xs p-2 border border-slate-200 rounded-xl mb-2" />
-              <button onclick="attachInboxToExistingItem()" class="w-full py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-xl transition">
+              <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Attach to an Existing Item</label>
+              <select id="convertSelectTargetItem" class="w-full text-xs p-2.5 border border-slate-800 rounded-xl bg-slate-950 text-slate-200 mb-2"></select>
+              <input type="text" id="convertCategoryName" placeholder="Searchable label / category" class="w-full text-xs p-2 bg-slate-950 border border-slate-800 text-slate-200 rounded-xl mb-2" />
+              <button onclick="attachInboxToExistingItem()" class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs rounded-xl transition border border-slate-700">
                 Attach as Detail Point
               </button>
             </div>
@@ -718,45 +737,45 @@
     </div>
 
     <!-- MODAL 5: SYNC & PROFILE SETTINGS -->
-    <div id="modalSyncBackup" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-4">
-      <div class="bg-white rounded-3xl w-full max-w-md flex flex-col overflow-hidden shadow-2xl">
-        <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+    <div id="modalSyncBackup" class="fixed inset-0 z-50 modal-backdrop hidden items-center justify-center p-3 sm:p-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md flex flex-col overflow-hidden shadow-2xl">
+        <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
           <div>
-            <h3 class="text-base font-bold text-slate-900">Sync & Account</h3>
-            <p class="text-xs text-slate-500">Live status across PC, Laptop & Phone</p>
+            <h3 class="text-base font-bold text-white">Sync & Account</h3>
+            <p class="text-xs text-slate-400">Live status across PC, Laptop & Phone</p>
           </div>
-          <button onclick="closeModal('modalSyncBackup')" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-sm">
+          <button onclick="closeModal('modalSyncBackup')" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-300 text-sm">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
 
         <div class="p-5 space-y-4">
-          <div class="bg-sky-50 border border-sky-100 p-3.5 rounded-2xl flex items-center justify-between">
+          <div class="bg-slate-950 border border-slate-800 p-3.5 rounded-2xl flex items-center justify-between">
             <div class="flex items-center space-x-3">
               <div class="w-10 h-10 rounded-full bg-sky-600 text-white flex items-center justify-center font-bold text-sm">
                 <i class="fa-solid fa-user-check"></i>
               </div>
               <div>
-                <p id="authActiveUserEmail" class="text-xs font-bold text-sky-900 truncate max-w-[190px]">Connecting...</p>
-                <span class="text-[10px] text-emerald-600 font-semibold flex items-center">
-                  <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1"></span> Live Cloud Synced
+                <p id="authActiveUserEmail" class="text-xs font-bold text-slate-200 truncate max-w-[190px]">Connecting...</p>
+                <span class="text-[10px] text-emerald-400 font-semibold flex items-center">
+                  <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full mr-1 animate-pulse"></span> Live Cloud Synced
                 </span>
               </div>
             </div>
-            <button onclick="logoutGoogle()" class="text-xs text-rose-600 hover:text-rose-800 font-bold bg-white px-2.5 py-1.5 rounded-xl border border-rose-200">
+            <button onclick="logoutGoogle()" class="text-xs text-rose-400 hover:text-rose-300 font-bold bg-rose-950/60 px-2.5 py-1.5 rounded-xl border border-rose-800">
               Sign Out
             </button>
           </div>
 
-          <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
-            <h4 class="text-xs font-bold text-slate-800 uppercase mb-1">Local JSON File Backup</h4>
+          <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
+            <h4 class="text-xs font-bold text-slate-300 uppercase mb-1">Local JSON File Backup</h4>
             <p class="text-[11px] text-slate-500 mb-2.5">Snapshot backup of all items, searchable labels, and links.</p>
             <div class="grid grid-cols-2 gap-2">
-              <button onclick="exportDatabaseJSON()" class="py-2 px-3 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1">
+              <button onclick="exportDatabaseJSON()" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1 border border-slate-700">
                 <i class="fa-solid fa-download"></i>
                 <span>Export</span>
               </button>
-              <label class="py-2 px-3 bg-white border border-slate-300 hover:bg-slate-100 text-slate-800 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1 cursor-pointer">
+              <label class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1 cursor-pointer border border-slate-700">
                 <i class="fa-solid fa-upload"></i>
                 <span>Import</span>
                 <input type="file" id="importJsonFileInput" accept=".json" onchange="importDatabaseJSON(event)" class="hidden" />
@@ -769,7 +788,9 @@
 
   </div>
 
-  <!-- JAVASCRIPT CORE ENGINE -->
+  <!-- ========================================================= -->
+  <!-- JAVASCRIPT CORE ENGINE                                    -->
+  <!-- ========================================================= -->
   <script>
     // 1. Firebase Credentials
     const firebaseConfig = {
@@ -782,7 +803,7 @@
       appId: "1:862817215160:web:aa9c6265369a97dfd44a4d"
     };
 
-    // 2. Initialize Firebase FIRST
+    // 2. Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
@@ -793,9 +814,9 @@
     const configCollection = db.collection("app_config");
 
     // Local Storage Keys
-    const STORAGE_KEY_ITEMS = 'omnisync_items_v7';
-    const STORAGE_KEY_INBOX = 'omnisync_inbox_v7';
-    const STORAGE_KEY_LABELS = 'omnisync_labels_v7';
+    const STORAGE_KEY_ITEMS = 'omnisync_items_v8';
+    const STORAGE_KEY_INBOX = 'omnisync_inbox_v8';
+    const STORAGE_KEY_LABELS = 'omnisync_labels_v8';
     const STORAGE_KEY_ALLOWED_EMAIL = 'omnisync_allowed_email';
 
     // Default Starting Global Labels Library
@@ -812,7 +833,7 @@
     ];
 
     let globalLabels = [];
-    let activeLabelFilter = null; // Filter directory by specific custom label
+    let activeLabelFilter = null;
 
     let allowedEmail = localStorage.getItem(STORAGE_KEY_ALLOWED_EMAIL) || "";
     document.getElementById('inputCustomAllowedEmail').value = allowedEmail;
@@ -874,7 +895,7 @@
     let currentOmniFilterType = 'all';
     let currentInboxType = 'note';
     let stagedMediaModeUpload = null;
-    let currentDetailMode = 'text'; // 'text' or 'media'
+    let currentDetailMode = 'text';
 
     // Load Local Cache
     try {
@@ -915,7 +936,6 @@
         console.warn("Firestore inbox notice:", error);
       });
 
-      // Sync Global Labels Document
       configCollection.doc("global_labels").onSnapshot((doc) => {
         if (doc.exists && Array.isArray(doc.data().labels)) {
           const incoming = doc.data().labels;
@@ -952,7 +972,6 @@
       configCollection.doc("global_labels").set({ labels: globalLabels }, { merge: true }).catch(() => {});
     }
 
-    // Scan all items to make sure any label used in any detail point is part of globalLabels
     function extractAndSyncLabelsFromItems() {
       let changed = false;
       items.forEach(it => {
@@ -964,9 +983,7 @@
           }
         });
       });
-      if (changed) {
-        syncGlobalLabelsToCloud();
-      }
+      if (changed) syncGlobalLabelsToCloud();
       refreshLabelPickers();
       renderDynamicLabelFilterBar();
     }
@@ -1091,9 +1108,7 @@
       renderDirectoryList();
     }
 
-    // =========================================================================
-    // REDESIGNED DETAIL POINT CREATOR ENGINE (Text Mode vs Media Mode + Labels)
-    // =========================================================================
+    // Detail Point Mode Switcher
     function setDetailMode(mode) {
       currentDetailMode = mode;
       const btnText = document.getElementById('btnModeText');
@@ -1103,19 +1118,19 @@
       const helper = document.getElementById('modeHelperText');
 
       if (mode === 'text') {
-        btnText.classList.add('bg-white', 'text-sky-700', 'border', 'border-sky-200', 'shadow-xs');
-        btnText.classList.remove('text-slate-600');
-        btnMedia.classList.remove('bg-white', 'text-sky-700', 'border', 'border-sky-200', 'shadow-xs');
-        btnMedia.classList.add('text-slate-600');
+        btnText.classList.add('bg-slate-800', 'text-sky-400', 'border', 'border-slate-700', 'shadow-xs');
+        btnText.classList.remove('text-slate-400');
+        btnMedia.classList.remove('bg-slate-800', 'text-sky-400', 'border', 'border-slate-700', 'shadow-xs');
+        btnMedia.classList.add('text-slate-400');
 
         textContainer.classList.remove('hidden');
         mediaContainer.classList.add('hidden');
         helper.textContent = "Enter notes, description, phone numbers, or emails. Action buttons will be auto-generated.";
       } else {
-        btnMedia.classList.add('bg-white', 'text-sky-700', 'border', 'border-sky-200', 'shadow-xs');
-        btnMedia.classList.remove('text-slate-600');
-        btnText.classList.remove('bg-white', 'text-sky-700', 'border', 'border-sky-200', 'shadow-xs');
-        btnText.classList.add('text-slate-600');
+        btnMedia.classList.add('bg-slate-800', 'text-sky-400', 'border', 'border-slate-700', 'shadow-xs');
+        btnMedia.classList.remove('text-slate-400');
+        btnText.classList.remove('bg-slate-800', 'text-sky-400', 'border', 'border-slate-700', 'shadow-xs');
+        btnText.classList.add('text-slate-400');
 
         mediaContainer.classList.remove('hidden');
         textContainer.classList.add('hidden');
@@ -1124,7 +1139,6 @@
     }
 
     function refreshLabelPickers() {
-      // 1. Populate Modal Dropdown
       const select = document.getElementById('selectGlobalLabel');
       if (select) {
         const currentVal = select.value;
@@ -1136,7 +1150,6 @@
         if (currentVal) select.value = currentVal;
       }
 
-      // 2. Populate Modal Chips
       const chipsContainer = document.getElementById('modalLabelChipsContainer');
       if (chipsContainer) {
         let chipsHtml = '';
@@ -1145,7 +1158,7 @@
             <button 
               type="button" 
               onclick="applyGlobalLabelDirectly('${escapeHtml(lbl)}')" 
-              class="px-2 py-0.5 rounded-lg bg-slate-100 hover:bg-sky-100 text-slate-700 hover:text-sky-800 text-[11px] font-medium border border-slate-200 transition shrink-0"
+              class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-sky-950 text-slate-300 hover:text-sky-300 text-[11px] font-medium border border-slate-700 transition shrink-0"
             >
               ${escapeHtml(lbl)}
             </button>
@@ -1192,20 +1205,20 @@
       const reader = new FileReader();
       reader.onload = function(e) {
         let detectedType = 'file';
-        let iconHtml = '<i class="fa-solid fa-file-lines text-slate-600"></i>';
+        let iconHtml = '<i class="fa-solid fa-file-lines text-slate-400"></i>';
 
         if (file.type.startsWith('image/')) {
           detectedType = 'image';
-          iconHtml = '<i class="fa-solid fa-image text-amber-500"></i>';
+          iconHtml = '<i class="fa-solid fa-image text-amber-400"></i>';
         } else if (file.type.startsWith('video/')) {
           detectedType = 'video';
-          iconHtml = '<i class="fa-solid fa-video text-purple-500"></i>';
+          iconHtml = '<i class="fa-solid fa-video text-purple-400"></i>';
         } else if (file.type.startsWith('audio/')) {
           detectedType = 'voice';
-          iconHtml = '<i class="fa-solid fa-microphone text-teal-500"></i>';
+          iconHtml = '<i class="fa-solid fa-microphone text-teal-400"></i>';
         } else if (file.type.includes('pdf')) {
           detectedType = 'pdf';
-          iconHtml = '<i class="fa-solid fa-file-pdf text-rose-500"></i>';
+          iconHtml = '<i class="fa-solid fa-file-pdf text-rose-400"></i>';
         }
 
         stagedMediaModeUpload = {
@@ -1216,7 +1229,6 @@
           detectedType: detectedType
         };
 
-        // If label is empty, suggest based on file
         const labelInput = document.getElementById('inputPointLabel');
         if (!labelInput.value.trim()) {
           const suggested = file.name.split('.')[0];
@@ -1240,15 +1252,12 @@
       document.getElementById('mediaModePreviewCard').classList.add('hidden');
     }
 
-    // Auto-detect phone and email in text content
     function detectTextSubtype(str) {
       if (!str) return 'text';
       const trimmed = str.trim();
-      // Email regex
       if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
         return 'email';
       }
-      // Phone regex: contains mostly digits, +, spaces, min 6 digits
       const digits = trimmed.replace(/[^0-9]/g, '');
       if (digits.length >= 7 && /^[\d\s+\-().]{7,25}$/.test(trimmed)) {
         return 'phone';
@@ -1256,17 +1265,19 @@
       return 'text';
     }
 
-    // SAVING REDESIGNED DETAIL POINT
+    // =========================================================================
+    // SAVING DETAIL POINT (Immediately dismisses modal & returns to item page)
+    // =========================================================================
     function saveDetailPoint() {
       const currentItem = items.find(it => it.id === currentActiveItemId);
       if (!currentItem) {
         showToast("Error: No item is currently open");
+        closeModal('modalDetailPoint');
         return;
       }
 
       const label = (document.getElementById('inputPointLabel').value || '').trim() || 'General';
 
-      // Auto add label to global library if not present
       if (!globalLabels.includes(label)) {
         globalLabels.push(label);
         syncGlobalLabelsToCloud();
@@ -1288,7 +1299,6 @@
         }
         pointType = detectTextSubtype(pointValue);
       } else {
-        // Media mode
         const urlInput = (document.getElementById('inputMediaUrl').value || '').trim();
         pointNotes = (document.getElementById('inputMediaCaption').value || '').trim();
 
@@ -1326,7 +1336,7 @@
 
       currentItem.details.push(newPoint);
 
-      // Save locally and in Cloud
+      // Save locally and push to Firestore
       saveItemToCloud(currentItem);
       saveData();
 
@@ -1338,15 +1348,16 @@
       document.getElementById('inputPointLabel').value = '';
       document.getElementById('selectGlobalLabel').value = '';
       setDetailMode('text');
+
+      // 1. Immediately disappear/close modal
       closeModal('modalDetailPoint');
 
+      // 2. Return directly to item record page with point rendered
       renderDetailView();
       showToast(`Added point labeled "${label}"`);
     }
 
-    // =========================================================
-    // DYNAMIC FILTER BY LABEL BAR (HOME SCREEN)
-    // =========================================================
+    // Dynamic Filter by Label Bar
     function renderDynamicLabelFilterBar() {
       const container = document.getElementById('dynamicLabelFilterContainer');
       if (!container) return;
@@ -1354,7 +1365,7 @@
       let html = `
         <button 
           onclick="setLabelFilter(null)" 
-          class="px-2 py-0.5 rounded-full text-[10px] font-bold transition shrink-0 ${activeLabelFilter === null ? 'bg-sky-600 text-white shadow-2xs' : 'bg-slate-200/80 text-slate-600 hover:bg-slate-300'}"
+          class="px-2 py-0.5 rounded-full text-[10px] font-bold transition shrink-0 ${activeLabelFilter === null ? 'bg-sky-600 text-white shadow-2xs' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}"
         >
           All Labels
         </button>
@@ -1365,7 +1376,7 @@
         html += `
           <button 
             onclick="setLabelFilter('${escapeHtml(lbl)}')" 
-            class="px-2 py-0.5 rounded-full text-[10px] font-bold transition shrink-0 ${isSelected ? 'bg-sky-600 text-white shadow-2xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}"
+            class="px-2 py-0.5 rounded-full text-[10px] font-bold transition shrink-0 ${isSelected ? 'bg-sky-600 text-white shadow-2xs' : 'bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800'}"
           >
             ${escapeHtml(lbl)}
           </button>
@@ -1377,7 +1388,7 @@
 
     function setLabelFilter(lbl) {
       if (activeLabelFilter === lbl) {
-        activeLabelFilter = null; // Toggle off
+        activeLabelFilter = null;
       } else {
         activeLabelFilter = lbl;
       }
@@ -1397,7 +1408,7 @@
       showToast(`Showing items with label: "${lbl}"`);
     }
 
-    // Modal Create / Edit Item Handlers
+    // Create / Edit Item Handlers
     function openCreateItemModal() {
       document.getElementById('editItemId').value = '';
       document.getElementById('inputItemTitle').value = '';
@@ -1414,7 +1425,7 @@
       const candidates = items.filter(it => it.id !== currentEditId);
 
       if (candidates.length === 0) {
-        container.innerHTML = `<p class="text-[11px] text-slate-400 italic p-1">No other items exist yet. Use the field above to add one!</p>`;
+        container.innerHTML = `<p class="text-[11px] text-slate-500 italic p-1">No other items exist yet. Use the field above to add one!</p>`;
         return;
       }
 
@@ -1422,8 +1433,8 @@
       candidates.forEach(cand => {
         const isChecked = selectedIds.includes(cand.id) ? 'checked' : '';
         html += `
-          <label class="flex items-center space-x-2 text-xs text-slate-700 hover:bg-slate-50 p-1.5 rounded-lg cursor-pointer transition">
-            <input type="checkbox" value="${cand.id}" class="link-item-checkbox rounded text-sky-600 focus:ring-sky-500" ${isChecked} />
+          <label class="flex items-center space-x-2 text-xs text-slate-300 hover:bg-slate-800/80 p-1.5 rounded-lg cursor-pointer transition">
+            <input type="checkbox" value="${cand.id}" class="link-item-checkbox rounded bg-slate-950 border-slate-700 text-sky-500 focus:ring-sky-500" ${isChecked} />
             <span class="font-semibold truncate">${escapeHtml(cand.title)}</span>
           </label>
         `;
@@ -1520,7 +1531,6 @@
       );
     });
 
-    // Detail Point Modal Trigger
     document.getElementById('btnOpenAddDetailModal').addEventListener('click', () => {
       document.getElementById('inputPointLabel').value = '';
       document.getElementById('inputPointTextContent').value = '';
@@ -1543,7 +1553,7 @@
       showToast("Point removed");
     }
 
-    // DIRECT EXTRACTION & DIRECT ROSTER RENDERER
+    // DIRECT ROSTER RENDERER
     function renderDirectoryList() {
       const container = document.getElementById('itemsListContainer');
       const emptyState = document.getElementById('emptyItemsState');
@@ -1576,7 +1586,7 @@
         viewSubtitle.textContent = "All items, media points & multi-way links";
       }
 
-      // PHONEBOOK ROSTER
+      // PHONEBOOK
       if (currentOmniFilterType === 'phone') {
         const phoneList = [];
         items.forEach(item => {
@@ -1621,29 +1631,29 @@
         filteredPhones.forEach(p => {
           const cleanPhoneDigits = p.number.replace(/[^0-9+]/g, '');
           html += `
-            <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-emerald-100 hover:border-emerald-300 shadow-xs transition">
+            <div class="bg-slate-900 p-3.5 sm:p-4 rounded-2xl border border-emerald-900/50 hover:border-emerald-500/50 shadow-sm transition">
               <div class="flex items-start justify-between">
                 <div class="min-w-0 pr-2">
-                  <span onclick="openItemDetail('${p.itemId}')" class="cursor-pointer text-[11px] font-bold text-sky-700 hover:text-sky-900 hover:underline flex items-center space-x-1">
+                  <span onclick="openItemDetail('${p.itemId}')" class="cursor-pointer text-[11px] font-bold text-sky-400 hover:text-sky-300 hover:underline flex items-center space-x-1">
                     <i class="fa-solid fa-folder text-[10px]"></i>
                     <span class="truncate">${escapeHtml(p.itemTitle)}</span>
                   </span>
                   <div class="mt-1 flex items-baseline space-x-2">
-                    <span class="text-base sm:text-lg font-bold font-mono tracking-tight text-slate-900">${escapeHtml(p.number)}</span>
+                    <span class="text-base sm:text-lg font-bold font-mono tracking-tight text-white">${escapeHtml(p.number)}</span>
                   </div>
-                  <span onclick="filterByLabelDirectly('${escapeHtml(p.category)}')" class="cursor-pointer inline-block text-[10px] font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded-md mt-1 transition">
+                  <span onclick="filterByLabelDirectly('${escapeHtml(p.category)}')" class="cursor-pointer inline-block text-[10px] font-semibold text-emerald-400 bg-emerald-950/60 hover:bg-emerald-900 border border-emerald-800/80 px-2 py-0.5 rounded-md mt-1 transition">
                     <i class="fa-solid fa-tag text-[9px] mr-1"></i>${escapeHtml(p.category)}
                   </span>
                 </div>
                 <div class="flex items-center space-x-1.5 shrink-0 pt-0.5">
-                  <a href="tel:${cleanPhoneDigits}" class="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs shadow-xs transition flex items-center space-x-1" title="Call directly">
+                  <a href="tel:${cleanPhoneDigits}" class="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs shadow-xs transition flex items-center space-x-1" title="Call directly">
                     <i class="fa-solid fa-phone"></i>
                     <span class="hidden sm:inline font-bold">Call</span>
                   </a>
-                  <a href="https://wa.me/${cleanPhoneDigits.replace('+', '')}" target="_blank" rel="noopener noreferrer" class="p-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs shadow-xs transition" title="WhatsApp">
+                  <a href="https://wa.me/${cleanPhoneDigits.replace('+', '')}" target="_blank" rel="noopener noreferrer" class="p-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs shadow-xs transition" title="WhatsApp">
                     <i class="fa-brands fa-whatsapp text-sm"></i>
                   </a>
-                  <button onclick="copyToClipboard('${escapeHtml(p.number)}', 'Phone number')" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs transition" title="Copy">
+                  <button onclick="copyToClipboard('${escapeHtml(p.number)}', 'Phone number')" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition border border-slate-700" title="Copy">
                     <i class="fa-regular fa-copy"></i>
                   </button>
                 </div>
@@ -1698,26 +1708,26 @@
         let html = '';
         filteredEmails.forEach(e => {
           html += `
-            <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-blue-100 hover:border-blue-300 shadow-xs transition">
+            <div class="bg-slate-900 p-3.5 sm:p-4 rounded-2xl border border-sky-950 hover:border-sky-500/50 shadow-sm transition">
               <div class="flex items-start justify-between">
                 <div class="min-w-0 pr-2">
-                  <span onclick="openItemDetail('${e.itemId}')" class="cursor-pointer text-[11px] font-bold text-sky-700 hover:text-sky-900 hover:underline flex items-center space-x-1">
+                  <span onclick="openItemDetail('${e.itemId}')" class="cursor-pointer text-[11px] font-bold text-sky-400 hover:text-sky-300 hover:underline flex items-center space-x-1">
                     <i class="fa-solid fa-folder text-[10px]"></i>
                     <span class="truncate">${escapeHtml(e.itemTitle)}</span>
                   </span>
                   <div class="mt-1">
-                    <span class="text-sm sm:text-base font-bold text-blue-900 break-all">${escapeHtml(e.email)}</span>
+                    <span class="text-sm sm:text-base font-bold text-sky-200 break-all">${escapeHtml(e.email)}</span>
                   </div>
-                  <span onclick="filterByLabelDirectly('${escapeHtml(e.category)}')" class="cursor-pointer inline-block text-[10px] font-semibold text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-md mt-1 transition">
+                  <span onclick="filterByLabelDirectly('${escapeHtml(e.category)}')" class="cursor-pointer inline-block text-[10px] font-semibold text-sky-400 bg-sky-950/60 hover:bg-sky-900 border border-sky-800/80 px-2 py-0.5 rounded-md mt-1 transition">
                     <i class="fa-solid fa-tag text-[9px] mr-1"></i>${escapeHtml(e.category)}
                   </span>
                 </div>
                 <div class="flex items-center space-x-1.5 shrink-0 pt-0.5">
-                  <a href="mailto:${escapeHtml(e.email)}" class="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs shadow-xs transition flex items-center space-x-1" title="Send Email">
+                  <a href="mailto:${escapeHtml(e.email)}" class="p-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs shadow-xs transition flex items-center space-x-1" title="Send Email">
                     <i class="fa-solid fa-envelope"></i>
                     <span class="hidden sm:inline font-bold">Mail</span>
                   </a>
-                  <button onclick="copyToClipboard('${escapeHtml(e.email)}', 'Email address')" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs transition" title="Copy">
+                  <button onclick="copyToClipboard('${escapeHtml(e.email)}', 'Email address')" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition border border-slate-700" title="Copy">
                     <i class="fa-regular fa-copy"></i>
                   </button>
                 </div>
@@ -1772,22 +1782,22 @@
         let html = '';
         filteredDocs.forEach(d => {
           html += `
-            <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-rose-100 hover:border-rose-300 shadow-xs transition flex items-center justify-between">
+            <div class="bg-slate-900 p-3.5 sm:p-4 rounded-2xl border border-rose-950 hover:border-rose-500/50 shadow-sm transition flex items-center justify-between">
               <div class="flex items-center space-x-3 min-w-0 pr-2">
-                <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg shrink-0 border border-rose-100">
+                <div class="w-10 h-10 rounded-xl bg-rose-950/80 text-rose-400 flex items-center justify-center text-lg shrink-0 border border-rose-800">
                   <i class="fa-solid fa-file-pdf"></i>
                 </div>
                 <div class="min-w-0">
-                  <span onclick="openItemDetail('${d.itemId}')" class="cursor-pointer text-[10px] font-bold text-sky-700 hover:underline truncate block">
+                  <span onclick="openItemDetail('${d.itemId}')" class="cursor-pointer text-[10px] font-bold text-sky-400 hover:underline truncate block">
                     Item: ${escapeHtml(d.itemTitle)}
                   </span>
-                  <h4 class="text-xs sm:text-sm font-bold text-slate-800 truncate">${escapeHtml(d.fileName)}</h4>
-                  <span onclick="filterByLabelDirectly('${escapeHtml(d.category)}')" class="cursor-pointer text-[10px] text-rose-700 font-semibold bg-rose-50 hover:bg-rose-100 px-1.5 py-0.5 rounded border border-rose-100 transition">
+                  <h4 class="text-xs sm:text-sm font-bold text-slate-200 truncate">${escapeHtml(d.fileName)}</h4>
+                  <span onclick="filterByLabelDirectly('${escapeHtml(d.category)}')" class="cursor-pointer text-[10px] text-rose-400 font-semibold bg-rose-950/60 px-1.5 py-0.5 rounded border border-rose-800 transition">
                     <i class="fa-solid fa-tag text-[9px] mr-1"></i>${escapeHtml(d.category)}
                   </span>
                 </div>
               </div>
-              <a href="${escapeHtml(d.url)}" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shrink-0 shadow-xs flex items-center space-x-1.5 transition">
+              <a href="${escapeHtml(d.url)}" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shrink-0 shadow-xs flex items-center space-x-1.5 transition">
                 <span>Open</span>
                 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
               </a>
@@ -1798,7 +1808,7 @@
         return;
       }
 
-      // PHOTOS & VIDEOS GALLERY
+      // PHOTOS & VIDEOS
       if (currentOmniFilterType === 'media') {
         const mediaList = [];
         items.forEach(item => {
@@ -1840,33 +1850,33 @@
         let html = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">';
         filteredMedia.forEach(m => {
           html += `
-            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:border-amber-400 transition flex flex-col">
+            <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-sm hover:border-amber-500/50 transition flex flex-col">
               <div class="relative bg-black flex items-center justify-center min-h-[140px] max-h-48 overflow-hidden">
                 ${m.type === 'image' 
-                  ? `<img src="${escapeHtml(m.url)}" alt="Media preview" class="w-full h-40 object-cover" onerror="this.src='https://placehold.co/400x250/f1f5f9/64748b?text=Image+Unavailable'" />`
+                  ? `<img src="${escapeHtml(m.url)}" alt="Media preview" class="w-full h-40 object-cover" onerror="this.src='https://placehold.co/400x250/090d16/94a3b8?text=Image+Unavailable'" />`
                   : (m.type === 'video'
                     ? `<video controls class="w-full h-40 object-cover bg-black"><source src="${escapeHtml(m.url)}" type="video/mp4" /></video>`
                     : `<div class="p-6 text-center text-white"><i class="fa-solid fa-microphone text-3xl mb-1 text-teal-400"></i><p class="text-xs">Audio Recording</p></div>`
                   )
                 }
-                <span class="absolute top-2 left-2 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-black/70 text-white backdrop-blur">
+                <span class="absolute top-2 left-2 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-black/80 text-white backdrop-blur">
                   ${m.type === 'image' ? '<i class="fa-solid fa-camera mr-1"></i>Image' : (m.type === 'video' ? '<i class="fa-solid fa-video mr-1"></i>Video' : '<i class="fa-solid fa-microphone mr-1"></i>Voice')}
                 </span>
               </div>
               <div class="p-3 flex-1 flex flex-col justify-between">
                 <div>
-                  <span onclick="openItemDetail('${m.itemId}')" class="cursor-pointer text-[10px] font-bold text-sky-700 hover:underline block truncate">
+                  <span onclick="openItemDetail('${m.itemId}')" class="cursor-pointer text-[10px] font-bold text-sky-400 hover:underline block truncate">
                     ${escapeHtml(m.itemTitle)}
                   </span>
-                  <span onclick="filterByLabelDirectly('${escapeHtml(m.category)}')" class="cursor-pointer text-xs font-semibold text-slate-800 hover:text-sky-600">
-                    <i class="fa-solid fa-tag text-[9px] text-amber-500 mr-1"></i>${escapeHtml(m.category)}
+                  <span onclick="filterByLabelDirectly('${escapeHtml(m.category)}')" class="cursor-pointer text-xs font-semibold text-slate-200 hover:text-sky-300">
+                    <i class="fa-solid fa-tag text-[9px] text-amber-400 mr-1"></i>${escapeHtml(m.category)}
                   </span>
                 </div>
-                <div class="pt-2 mt-2 border-t border-slate-100 flex items-center justify-between">
-                  <button onclick="openItemDetail('${m.itemId}')" class="text-[11px] font-semibold text-slate-500 hover:text-sky-600 transition">
+                <div class="pt-2 mt-2 border-t border-slate-800 flex items-center justify-between">
+                  <button onclick="openItemDetail('${m.itemId}')" class="text-[11px] font-semibold text-slate-400 hover:text-sky-400 transition">
                     View Item <i class="fa-solid fa-arrow-right text-[9px]"></i>
                   </button>
-                  <a href="${escapeHtml(m.url)}" target="_blank" class="text-[11px] text-slate-400 hover:text-slate-700" title="Open full media">
+                  <a href="${escapeHtml(m.url)}" target="_blank" class="text-[11px] text-slate-500 hover:text-slate-300" title="Open full media">
                     <i class="fa-solid fa-expand"></i>
                   </a>
                 </div>
@@ -1908,12 +1918,12 @@
         let html = '';
         filteredConn.forEach(source => {
           html += `
-            <div class="bg-white p-4 rounded-2xl border border-indigo-100 shadow-xs hover:border-indigo-300 transition">
-              <div class="flex items-center justify-between mb-2 pb-2 border-b border-indigo-50">
-                <h4 onclick="openItemDetail('${source.id}')" class="text-sm font-bold text-slate-900 cursor-pointer hover:text-indigo-600 truncate">
+            <div class="bg-slate-900 p-4 rounded-2xl border border-indigo-950 shadow-sm hover:border-indigo-500/50 transition">
+              <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-800">
+                <h4 onclick="openItemDetail('${source.id}')" class="text-sm font-bold text-white cursor-pointer hover:text-indigo-400 truncate">
                   ${escapeHtml(source.title)}
                 </h4>
-                <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full shrink-0">
+                <span class="text-[10px] font-bold text-indigo-300 bg-indigo-950/80 border border-indigo-800 px-2 py-0.5 rounded-full shrink-0">
                   ${(source.linkedItemIds || []).length} Mutual Links
                 </span>
               </div>
@@ -1922,8 +1932,8 @@
                   const target = items.find(t => t.id === lid);
                   if (!target) return '';
                   return `
-                    <span onclick="openItemDetail('${target.id}')" class="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-xl bg-slate-50 hover:bg-indigo-50 text-indigo-900 border border-slate-200 hover:border-indigo-200 cursor-pointer transition">
-                      <i class="fa-solid fa-link text-[10px] text-indigo-500 mr-1.5"></i>
+                    <span onclick="openItemDetail('${target.id}')" class="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-xl bg-slate-950 hover:bg-indigo-950 text-indigo-300 border border-slate-800 hover:border-indigo-800 cursor-pointer transition">
+                      <i class="fa-solid fa-link text-[10px] text-indigo-400 mr-1.5"></i>
                       <span class="truncate max-w-[150px]">${escapeHtml(target.title)}</span>
                     </span>
                   `;
@@ -1936,10 +1946,9 @@
         return;
       }
 
-      // DEFAULT CONTACT BOOK VIEW (A-Z)
+      // DEFAULT CONTACT BOOK VIEW (Dark Theme)
       let filtered = [...items];
 
-      // Filter by Active Label if selected
       if (activeLabelFilter) {
         filtered = filtered.filter(item => {
           return (item.details || []).some(pt => {
@@ -1949,7 +1958,6 @@
         });
       }
 
-      // Filter by Omni-Search Query
       if (query) {
         filtered = filtered.filter(item => {
           const titleMatch = item.title && item.title.toLowerCase().includes(query);
@@ -2000,9 +2008,9 @@
         if (firstLetter !== currentSectionLetter) {
           currentSectionLetter = firstLetter;
           html += `
-            <div class="sticky top-12 z-20 bg-slate-100/95 backdrop-blur px-2.5 py-1 text-xs font-black text-sky-800 tracking-wider uppercase border-y border-slate-200/60 flex items-center justify-between">
+            <div class="sticky top-12 z-20 bg-slate-950/90 backdrop-blur-md px-2.5 py-1 text-xs font-black text-sky-400 tracking-wider uppercase border-y border-slate-800 flex items-center justify-between">
               <span>${currentSectionLetter}</span>
-              <span class="text-[10px] text-slate-400 font-normal">Section</span>
+              <span class="text-[10px] text-slate-500 font-normal">Section</span>
             </div>
           `;
         }
@@ -2016,43 +2024,40 @@
         const hasMedia = (item.details || []).some(d => d.type === 'image' || d.type === 'video');
         const hasPdf = (item.details || []).some(d => d.type === 'pdf');
 
-        // Extract label pills for this item
         const itemLabels = [...new Set((item.details || []).map(d => d.label || d.category).filter(Boolean))];
 
         html += `
-          <div onclick="openItemDetail('${item.id}')" class="group bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 hover:border-sky-400 hover:shadow-md transition cursor-pointer flex items-center justify-between">
+          <div onclick="openItemDetail('${item.id}')" class="group bg-slate-900 p-3.5 sm:p-4 rounded-2xl border border-slate-800 hover:border-sky-500/60 hover:shadow-lg hover:shadow-sky-500/10 transition cursor-pointer flex items-center justify-between">
             <div class="flex items-center space-x-3.5 min-w-0">
-              <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-xs group-hover:scale-105 transition-transform shrink-0">
+              <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-600 to-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-md group-hover:scale-105 transition-transform shrink-0">
                 ${initials}
               </div>
               <div class="min-w-0">
-                <h3 class="text-sm font-bold text-slate-800 group-hover:text-sky-600 transition truncate">${escapeHtml(item.title)}</h3>
-                <p class="text-xs text-slate-500 truncate max-w-xs sm:max-w-md mt-0.5">${escapeHtml(item.description || 'No description added')}</p>
+                <h3 class="text-sm font-bold text-white group-hover:text-sky-400 transition truncate">${escapeHtml(item.title)}</h3>
+                <p class="text-xs text-slate-400 truncate max-w-xs sm:max-w-md mt-0.5">${escapeHtml(item.description || 'No description added')}</p>
                 
                 <div class="flex items-center space-x-1.5 mt-2 flex-wrap gap-y-1">
-                  <span class="inline-flex items-center text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/60 px-2 py-0.5 rounded-full">
+                  <span class="inline-flex items-center text-[10px] font-semibold bg-indigo-950/70 text-indigo-300 border border-indigo-800/80 px-2 py-0.5 rounded-full">
                     <i class="fa-solid fa-circle-nodes mr-1 text-[9px]"></i> ${linkedCount} Connected
                   </span>
-                  <span class="inline-flex items-center text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
-                    <i class="fa-solid fa-list mr-1 text-[9px] text-sky-500"></i> ${detailsCount} Points
+                  <span class="inline-flex items-center text-[10px] font-semibold bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full">
+                    <i class="fa-solid fa-list mr-1 text-[9px] text-sky-400"></i> ${detailsCount} Points
                   </span>
 
-                  <!-- Quick Media Indicators -->
-                  ${hasPhone ? '<span class="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100"><i class="fa-solid fa-phone"></i></span>' : ''}
-                  ${hasEmail ? '<span class="text-[10px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100"><i class="fa-solid fa-envelope"></i></span>' : ''}
-                  ${hasPdf ? '<span class="text-[10px] text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100"><i class="fa-solid fa-file-pdf"></i></span>' : ''}
-                  ${hasMedia ? '<span class="text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100"><i class="fa-solid fa-photo-film"></i></span>' : ''}
+                  ${hasPhone ? '<span class="text-[10px] text-emerald-400 bg-emerald-950/70 px-1.5 py-0.5 rounded border border-emerald-800/80"><i class="fa-solid fa-phone"></i></span>' : ''}
+                  ${hasEmail ? '<span class="text-[10px] text-sky-400 bg-sky-950/70 px-1.5 py-0.5 rounded border border-sky-800/80"><i class="fa-solid fa-envelope"></i></span>' : ''}
+                  ${hasPdf ? '<span class="text-[10px] text-rose-400 bg-rose-950/70 px-1.5 py-0.5 rounded border border-rose-800/80"><i class="fa-solid fa-file-pdf"></i></span>' : ''}
+                  ${hasMedia ? '<span class="text-[10px] text-amber-400 bg-amber-950/70 px-1.5 py-0.5 rounded border border-amber-800/80"><i class="fa-solid fa-photo-film"></i></span>' : ''}
 
-                  <!-- Labels Preview -->
                   ${itemLabels.slice(0, 2).map(l => `
-                    <span onclick="event.stopPropagation(); filterByLabelDirectly('${escapeHtml(l)}')" class="text-[9px] font-bold text-slate-600 bg-slate-100 hover:bg-sky-100 hover:text-sky-800 px-1.5 py-0.5 rounded-md border border-slate-200 transition">
+                    <span onclick="event.stopPropagation(); filterByLabelDirectly('${escapeHtml(l)}')" class="text-[9px] font-bold text-slate-400 bg-slate-800 hover:bg-sky-950 hover:text-sky-300 px-1.5 py-0.5 rounded-md border border-slate-700 transition">
                       #${escapeHtml(l)}
                     </span>
                   `).join('')}
                 </div>
               </div>
             </div>
-            <div class="text-slate-300 group-hover:text-sky-500 pl-2">
+            <div class="text-slate-600 group-hover:text-sky-400 pl-2">
               <i class="fa-solid fa-chevron-right text-xs"></i>
             </div>
           </div>
@@ -2086,7 +2091,7 @@
       if (linkedIds.length === 0) {
         linkedContainer.innerHTML = `
           <div class="w-full text-center py-3">
-            <span class="text-xs text-slate-400 italic">No connected items yet. Click "Manage Links" to connect existing or add new ones!</span>
+            <span class="text-xs text-slate-500 italic">No connected items yet. Click "Manage Links" to connect existing or add new ones!</span>
           </div>
         `;
       } else {
@@ -2095,19 +2100,19 @@
           const linkedObj = items.find(it => it.id === id);
           if (linkedObj) {
             linksHtml += `
-              <div class="inline-flex items-center bg-white hover:bg-indigo-50 text-indigo-900 text-xs font-semibold px-3 py-1.5 rounded-xl border border-indigo-200 transition shadow-xs group">
+              <div class="inline-flex items-center bg-slate-900 hover:bg-indigo-950/80 text-indigo-300 text-xs font-semibold px-3 py-1.5 rounded-xl border border-indigo-900/80 transition shadow-xs group">
                 <span onclick="openItemDetail('${linkedObj.id}')" class="cursor-pointer flex items-center space-x-1.5">
-                  <i class="fa-solid fa-link text-indigo-500 text-[10px]"></i>
+                  <i class="fa-solid fa-link text-indigo-400 text-[10px]"></i>
                   <span class="truncate max-w-[160px]">${escapeHtml(linkedObj.title)}</span>
                 </span>
-                <button onclick="unlinkMutualItemDirectly('${linkedObj.id}')" class="ml-2 text-slate-400 hover:text-rose-500 p-0.5 rounded transition" title="Unlink">
+                <button onclick="unlinkMutualItemDirectly('${linkedObj.id}')" class="ml-2 text-slate-500 hover:text-rose-400 p-0.5 rounded transition" title="Unlink">
                   <i class="fa-solid fa-xmark text-[11px]"></i>
                 </button>
               </div>
             `;
           }
         });
-        linkedContainer.innerHTML = linksHtml || `<span class="text-xs text-slate-400 italic">Linked items not found.</span>`;
+        linkedContainer.innerHTML = linksHtml || `<span class="text-xs text-slate-500 italic">Linked items not found.</span>`;
       }
 
       const pointsContainer = document.getElementById('detailPointsContainer');
@@ -2115,9 +2120,9 @@
 
       if (points.length === 0) {
         pointsContainer.innerHTML = `
-          <div class="text-center py-8 bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-4">
-            <p class="text-xs text-slate-500 font-semibold">No detail points added yet.</p>
-            <p class="text-[11px] text-slate-400 mt-1">Click "Add Point" to add text notes, contacts, media or documents with custom labels.</p>
+          <div class="text-center py-8 bg-slate-950 border border-dashed border-slate-800 rounded-2xl p-4">
+            <p class="text-xs text-slate-400 font-semibold">No detail points added yet.</p>
+            <p class="text-[11px] text-slate-500 mt-1">Click "Add Point" to add text notes, contacts, media or documents with custom labels.</p>
           </div>
         `;
         return;
@@ -2125,26 +2130,26 @@
 
       let pointsHtml = '';
       points.forEach((point, index) => {
-        let badgeColor = "bg-slate-100 text-slate-700 border-slate-200";
+        let badgeColor = "bg-slate-800 text-slate-300 border-slate-700";
         let icon = "fa-tag";
 
         if (point.type === 'phone') {
-          badgeColor = "bg-emerald-50 text-emerald-700 border-emerald-200";
+          badgeColor = "bg-emerald-950/70 text-emerald-400 border-emerald-800";
           icon = "fa-phone";
         } else if (point.type === 'email') {
-          badgeColor = "bg-blue-50 text-blue-700 border-blue-200";
+          badgeColor = "bg-sky-950/70 text-sky-400 border-sky-800";
           icon = "fa-envelope";
         } else if (point.type === 'pdf') {
-          badgeColor = "bg-rose-50 text-rose-700 border-rose-200";
+          badgeColor = "bg-rose-950/70 text-rose-400 border-rose-800";
           icon = "fa-file-pdf";
         } else if (point.type === 'image') {
-          badgeColor = "bg-amber-50 text-amber-700 border-amber-200";
+          badgeColor = "bg-amber-950/70 text-amber-400 border-amber-800";
           icon = "fa-image";
         } else if (point.type === 'video') {
-          badgeColor = "bg-purple-50 text-purple-700 border-purple-200";
+          badgeColor = "bg-purple-950/70 text-purple-400 border-purple-800";
           icon = "fa-video";
         } else if (point.type === 'voice') {
-          badgeColor = "bg-teal-50 text-teal-700 border-teal-200";
+          badgeColor = "bg-teal-950/70 text-teal-400 border-teal-800";
           icon = "fa-microphone";
         }
 
@@ -2155,79 +2160,79 @@
           const clean = (point.value || '').replace(/[^0-9+]/g, '');
           bodyContent = `
             <div class="flex items-center justify-between">
-              <a href="tel:${clean}" class="text-sm font-bold text-emerald-700 hover:underline flex items-center">
+              <a href="tel:${clean}" class="text-sm font-bold text-emerald-400 hover:underline flex items-center">
                 <i class="fa-solid fa-phone mr-1.5 text-xs"></i> ${escapeHtml(point.value)}
               </a>
               <div class="flex space-x-1.5">
-                <a href="tel:${clean}" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold rounded-lg shadow-2xs">Call</a>
-                <a href="https://wa.me/${clean.replace('+', '')}" target="_blank" class="px-2 py-1 bg-teal-600 hover:bg-teal-700 text-white text-[11px] font-semibold rounded-lg shadow-2xs">WhatsApp</a>
-                <button onclick="copyToClipboard('${escapeHtml(point.value)}', 'Phone')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold rounded-lg">Copy</button>
+                <a href="tel:${clean}" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold rounded-lg shadow-xs">Call</a>
+                <a href="https://wa.me/${clean.replace('+', '')}" target="_blank" class="px-2.5 py-1 bg-teal-600 hover:bg-teal-500 text-white text-[11px] font-semibold rounded-lg shadow-xs">WhatsApp</a>
+                <button onclick="copyToClipboard('${escapeHtml(point.value)}', 'Phone')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold rounded-lg border border-slate-700">Copy</button>
               </div>
             </div>
           `;
         } else if (point.type === 'email') {
           bodyContent = `
             <div class="flex items-center justify-between">
-              <a href="mailto:${escapeHtml(point.value)}" class="text-sm font-bold text-blue-700 hover:underline flex items-center truncate max-w-[200px] sm:max-w-xs">
+              <a href="mailto:${escapeHtml(point.value)}" class="text-sm font-bold text-sky-400 hover:underline flex items-center truncate max-w-[200px] sm:max-w-xs">
                 <i class="fa-solid fa-envelope mr-1.5 text-xs"></i> ${escapeHtml(point.value)}
               </a>
               <div class="flex space-x-1.5">
-                <a href="mailto:${escapeHtml(point.value)}" class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-semibold rounded-lg shadow-2xs">Mail</a>
-                <button onclick="copyToClipboard('${escapeHtml(point.value)}', 'Email')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold rounded-lg">Copy</button>
+                <a href="mailto:${escapeHtml(point.value)}" class="px-2.5 py-1 bg-sky-600 hover:bg-sky-500 text-white text-[11px] font-semibold rounded-lg shadow-xs">Mail</a>
+                <button onclick="copyToClipboard('${escapeHtml(point.value)}', 'Email')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold rounded-lg border border-slate-700">Copy</button>
               </div>
             </div>
           `;
         } else if (point.type === 'image') {
           bodyContent = `
             <div class="mt-1">
-              <img src="${escapeHtml(point.value)}" alt="Point media" class="w-full max-h-56 object-cover rounded-xl border border-slate-200 shadow-xs" onerror="this.src='https://placehold.co/600x300/f1f5f9/64748b?text=Image+Preview'" />
-              ${point.notes ? `<p class="text-xs text-slate-600 mt-2">${escapeHtml(point.notes)}</p>` : ''}
+              <img src="${escapeHtml(point.value)}" alt="Point media" class="w-full max-h-56 object-cover rounded-xl border border-slate-800 shadow-sm" onerror="this.src='https://placehold.co/600x300/090d16/94a3b8?text=Image+Preview'" />
+              ${point.notes ? `<p class="text-xs text-slate-400 mt-2">${escapeHtml(point.notes)}</p>` : ''}
             </div>
           `;
         } else if (point.type === 'video') {
           bodyContent = `
             <div class="mt-1">
-              <video controls class="w-full max-h-56 rounded-xl border border-slate-200 bg-black">
+              <video controls class="w-full max-h-56 rounded-xl border border-slate-800 bg-black">
                 <source src="${escapeHtml(point.value)}" type="video/mp4" />
               </video>
-              ${point.notes ? `<p class="text-xs text-slate-600 mt-2">${escapeHtml(point.notes)}</p>` : ''}
+              ${point.notes ? `<p class="text-xs text-slate-400 mt-2">${escapeHtml(point.notes)}</p>` : ''}
             </div>
           `;
         } else if (point.type === 'pdf') {
           bodyContent = `
             <div>
-              <a href="${escapeHtml(point.value)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-2 bg-rose-50 border border-rose-200 p-2.5 rounded-xl text-xs font-semibold text-rose-800 hover:bg-rose-100 transition">
-                <i class="fa-solid fa-file-pdf text-base text-rose-600"></i>
+              <a href="${escapeHtml(point.value)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-2 bg-rose-950/60 border border-rose-900/80 p-2.5 rounded-xl text-xs font-semibold text-rose-300 hover:bg-rose-900/60 transition">
+                <i class="fa-solid fa-file-pdf text-base text-rose-400"></i>
                 <span class="truncate max-w-[220px]">${escapeHtml(point.fileName || point.value)}</span>
-                <span class="text-[10px] bg-white px-2 py-0.5 rounded text-rose-700 font-bold border border-rose-200">Open File</span>
+                <span class="text-[10px] bg-rose-900 px-2 py-0.5 rounded text-white font-bold border border-rose-700">Open File</span>
               </a>
-              ${point.notes ? `<p class="text-xs text-slate-600 mt-1.5">${escapeHtml(point.notes)}</p>` : ''}
+              ${point.notes ? `<p class="text-xs text-slate-400 mt-1.5">${escapeHtml(point.notes)}</p>` : ''}
             </div>
           `;
         } else if (point.type === 'voice') {
           bodyContent = `
-            <div class="bg-teal-50 border border-teal-200 p-2.5 rounded-xl flex items-center justify-between text-xs text-teal-900">
+            <div class="bg-teal-950/60 border border-teal-900/80 p-2.5 rounded-xl flex items-center justify-between text-xs text-teal-300">
               <div class="flex items-center space-x-2">
-                <i class="fa-solid fa-volume-high text-teal-600"></i>
+                <i class="fa-solid fa-volume-high text-teal-400"></i>
                 <span>${escapeHtml(point.value || "Recorded Voice Memo")}</span>
               </div>
-              <span class="text-[10px] font-mono text-teal-700">Audio Note</span>
+              <span class="text-[10px] font-mono text-teal-400">Audio Note</span>
             </div>
           `;
         } else {
-          bodyContent = `<p class="text-xs sm:text-sm text-slate-700 whitespace-pre-line leading-relaxed">${escapeHtml(point.value)}</p>`;
+          bodyContent = `<p class="text-xs sm:text-sm text-slate-300 whitespace-pre-line leading-relaxed">${escapeHtml(point.value)}</p>`;
         }
 
         pointsHtml += `
-          <div class="p-3.5 bg-white border border-slate-200 rounded-2xl shadow-xs hover:border-slate-300 transition">
-            <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-slate-100">
+          <div class="p-3.5 bg-slate-950 border border-slate-800 rounded-2xl shadow-sm hover:border-slate-700 transition">
+            <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-slate-850 border-slate-800/80">
               <div class="flex items-center space-x-2">
                 <span onclick="filterByLabelDirectly('${escapeHtml(pointLabel)}')" class="cursor-pointer inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${badgeColor} hover:opacity-80 transition" title="Filter directory by this label">
                   <i class="fa-solid ${icon} mr-1 text-[9px]"></i> ${escapeHtml(pointLabel)}
                 </span>
-                <span class="text-[10px] text-slate-400 font-mono">#${index + 1}</span>
+                <span class="text-[10px] text-slate-500 font-mono">#${index + 1}</span>
               </div>
-              <button onclick="deleteDetailPoint('${point.id}')" class="text-slate-400 hover:text-rose-500 p-1 text-xs" title="Remove point">
+              <button onclick="deleteDetailPoint('${point.id}')" class="text-slate-500 hover:text-rose-400 p-1 text-xs" title="Remove point">
                 <i class="fa-solid fa-trash-can"></i>
               </button>
             </div>
@@ -2260,7 +2265,7 @@
 
       const candidates = items.filter(it => it.id !== current.id);
       if (candidates.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-400 p-2 italic">No other items exist yet. Use the box above to create and link a new item!</p>`;
+        container.innerHTML = `<p class="text-xs text-slate-500 p-2 italic">No other items exist yet. Use the box above to create and link a new item!</p>`;
         return;
       }
 
@@ -2269,12 +2274,12 @@
       candidates.forEach(cand => {
         const isChecked = activeLinked.includes(cand.id) ? 'checked' : '';
         html += `
-          <label class="flex items-center justify-between text-xs text-slate-700 hover:bg-indigo-50/60 p-2 rounded-xl cursor-pointer transition border border-transparent hover:border-indigo-100">
+          <label class="flex items-center justify-between text-xs text-slate-300 hover:bg-slate-900 p-2 rounded-xl cursor-pointer transition border border-transparent hover:border-slate-800">
             <div class="flex items-center space-x-2 min-w-0">
-              <input type="checkbox" value="${cand.id}" class="direct-link-checkbox rounded text-indigo-600 focus:ring-indigo-500" ${isChecked} />
+              <input type="checkbox" value="${cand.id}" class="direct-link-checkbox rounded bg-slate-900 border-slate-700 text-indigo-500 focus:ring-indigo-500" ${isChecked} />
               <span class="font-bold truncate">${escapeHtml(cand.title)}</span>
             </div>
-            <span class="text-[10px] text-slate-400 shrink-0 ml-2">#${cand.id}</span>
+            <span class="text-[10px] text-slate-500 shrink-0 ml-2">#${cand.id}</span>
           </label>
         `;
       });
@@ -2302,10 +2307,10 @@
 
       if (inboxItems.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-10 bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-4">
-            <i class="fa-regular fa-folder-closed text-slate-300 text-3xl mb-2"></i>
-            <p class="text-xs text-slate-500">Inbox is empty.</p>
-            <p class="text-[10px] text-slate-400">Capture quick thoughts, photos, or audio above without categorizing yet.</p>
+          <div class="text-center py-10 bg-slate-950 border border-dashed border-slate-800 rounded-2xl p-4">
+            <i class="fa-regular fa-folder-closed text-slate-600 text-3xl mb-2"></i>
+            <p class="text-xs text-slate-400">Inbox is empty.</p>
+            <p class="text-[10px] text-slate-500">Capture quick thoughts, photos, or audio above without categorizing yet.</p>
           </div>
         `;
         return;
@@ -2315,30 +2320,30 @@
       inboxItems.forEach(item => {
         let mediaSnippet = '';
         if (item.type === 'image' && item.fileUrl) {
-          mediaSnippet = `<img src="${item.fileUrl}" class="w-12 h-12 object-cover rounded-lg border border-slate-200 shrink-0" onerror="this.src='https://placehold.co/100x100?text=IMG'"/>`;
+          mediaSnippet = `<img src="${item.fileUrl}" class="w-12 h-12 object-cover rounded-lg border border-slate-800 shrink-0" onerror="this.src='https://placehold.co/100x100/090d16/94a3b8?text=IMG'"/>`;
         } else if (item.type === 'voice') {
-          mediaSnippet = `<div class="w-10 h-10 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center text-sm shrink-0"><i class="fa-solid fa-microphone"></i></div>`;
+          mediaSnippet = `<div class="w-10 h-10 rounded-lg bg-teal-950 text-teal-400 flex items-center justify-center text-sm shrink-0 border border-teal-800"><i class="fa-solid fa-microphone"></i></div>`;
         } else if (item.type === 'file') {
-          mediaSnippet = `<div class="w-10 h-10 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center text-sm shrink-0"><i class="fa-solid fa-file-pdf"></i></div>`;
+          mediaSnippet = `<div class="w-10 h-10 rounded-lg bg-rose-950 text-rose-400 flex items-center justify-center text-sm shrink-0 border border-rose-800"><i class="fa-solid fa-file-pdf"></i></div>`;
         } else {
-          mediaSnippet = `<div class="w-10 h-10 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center text-sm shrink-0"><i class="fa-solid fa-note-sticky"></i></div>`;
+          mediaSnippet = `<div class="w-10 h-10 rounded-lg bg-sky-950 text-sky-400 flex items-center justify-center text-sm shrink-0 border border-sky-800"><i class="fa-solid fa-note-sticky"></i></div>`;
         }
 
         html += `
-          <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs flex items-start justify-between space-x-3">
+          <div class="bg-slate-900 p-3 rounded-2xl border border-slate-800 shadow-sm flex items-start justify-between space-x-3">
             <div class="flex items-start space-x-3 min-w-0">
               ${mediaSnippet}
               <div class="min-w-0">
-                <span class="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 mb-0.5">${item.type}</span>
-                <p class="text-xs text-slate-800 line-clamp-2">${escapeHtml(item.content || item.fileUrl || "Media item")}</p>
-                <span class="text-[10px] text-slate-400 mt-1 block">${item.date || "Recent"}</span>
+                <span class="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 mb-0.5">${item.type}</span>
+                <p class="text-xs text-slate-200 line-clamp-2">${escapeHtml(item.content || item.fileUrl || "Media item")}</p>
+                <span class="text-[10px] text-slate-500 mt-1 block">${item.date || "Recent"}</span>
               </div>
             </div>
             <div class="flex flex-col space-y-1.5 shrink-0">
-              <button onclick="openConvertModal('${item.id}')" class="px-2.5 py-1 text-[11px] font-bold bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition shadow-xs">
+              <button onclick="openConvertModal('${item.id}')" class="px-2.5 py-1 text-[11px] font-bold bg-sky-600 hover:bg-sky-500 text-white rounded-lg transition shadow-xs">
                 Arrange <i class="fa-solid fa-arrow-right ml-1"></i>
               </button>
-              <button onclick="deleteInboxItem('${item.id}')" class="text-slate-400 hover:text-rose-500 text-[10px] text-center">
+              <button onclick="deleteInboxItem('${item.id}')" class="text-slate-500 hover:text-rose-400 text-[10px] text-center">
                 Dismiss
               </button>
             </div>
@@ -2352,8 +2357,8 @@
     function setInboxType(type) {
       currentInboxType = type;
       document.querySelectorAll('.inbox-type-btn').forEach(b => {
-        b.classList.remove('border-sky-500', 'bg-sky-50', 'text-sky-700');
-        b.classList.add('border-slate-200', 'bg-slate-50', 'text-slate-600');
+        b.classList.remove('border-sky-500', 'bg-sky-950/60', 'text-sky-300');
+        b.classList.add('border-slate-800', 'bg-slate-950', 'text-slate-400');
       });
 
       const fileRow = document.getElementById('inboxFileUploadRow');
@@ -2364,18 +2369,18 @@
       voiceRow.classList.add('hidden');
 
       if (type === 'note') {
-        document.getElementById('inboxTypeNote').classList.add('border-sky-500', 'bg-sky-50', 'text-sky-700');
+        document.getElementById('inboxTypeNote').classList.add('border-sky-500', 'bg-sky-950/60', 'text-sky-300');
         inputEl.placeholder = "Jot down a quick thought, link, or phone number...";
       } else if (type === 'image') {
-        document.getElementById('inboxTypeImage').classList.add('border-sky-500', 'bg-sky-50', 'text-sky-700');
+        document.getElementById('inboxTypeImage').classList.add('border-sky-500', 'bg-sky-950/60', 'text-sky-300');
         fileRow.classList.remove('hidden');
         inputEl.placeholder = "Image description or caption (optional)...";
       } else if (type === 'voice') {
-        document.getElementById('inboxTypeVoice').classList.add('border-sky-500', 'bg-sky-50', 'text-sky-700');
+        document.getElementById('inboxTypeVoice').classList.add('border-sky-500', 'bg-sky-950/60', 'text-sky-300');
         voiceRow.classList.remove('hidden');
         inputEl.placeholder = "Type quick voice transcript or click Record...";
       } else if (type === 'file') {
-        document.getElementById('inboxTypeFile').classList.add('border-sky-500', 'bg-sky-50', 'text-sky-700');
+        document.getElementById('inboxTypeFile').classList.add('border-sky-500', 'bg-sky-950/60', 'text-sky-300');
         fileRow.classList.remove('hidden');
         inputEl.placeholder = "Document description or notes...";
       }
@@ -2525,7 +2530,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `OmniSync_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `OmniSync_Dark_Backup_${new Date().toISOString().slice(0, 10)}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -2583,7 +2588,7 @@
       modal.classList.remove('flex');
     }
 
-    // Clock
+    // Live Clock
     function startClock() {
       const dateEl = document.getElementById('headerDate');
       const timeEl = document.getElementById('headerTime');
@@ -2639,15 +2644,15 @@
       const tabLeft = document.getElementById('navTabLeft');
       const tabRight = document.getElementById('navTabRight');
       
-      tabLeft.classList.remove('text-sky-600');
-      tabRight.classList.remove('text-sky-600');
-      tabLeft.classList.add('text-slate-500');
-      tabRight.classList.add('text-slate-500');
+      tabLeft.classList.remove('text-sky-400');
+      tabRight.classList.remove('text-sky-400');
+      tabLeft.classList.add('text-slate-400');
+      tabRight.classList.add('text-slate-400');
 
       if (tab === 'home') {
         viewHome.classList.remove('hidden');
-        tabRight.classList.remove('text-slate-500');
-        tabRight.classList.add('text-sky-600');
+        tabRight.classList.remove('text-slate-400');
+        tabRight.classList.add('text-sky-400');
         renderDynamicLabelFilterBar();
         renderDirectoryList();
       } else if (tab === 'detail') {
@@ -2655,8 +2660,8 @@
         renderDetailView();
       } else if (tab === 'inbox') {
         viewInbox.classList.remove('hidden');
-        tabLeft.classList.remove('text-slate-500');
-        tabLeft.classList.add('text-sky-600');
+        tabLeft.classList.remove('text-slate-400');
+        tabLeft.classList.add('text-sky-400');
         renderInboxList();
       }
     }
@@ -2688,11 +2693,11 @@
       document.querySelectorAll('.omni-filter-chip').forEach(chip => {
         const chipType = chip.getAttribute('data-filter');
         if (chipType === currentOmniFilterType) {
-          chip.classList.remove('bg-white', 'text-slate-600');
-          chip.classList.add('bg-slate-900', 'text-white');
+          chip.classList.remove('bg-slate-900', 'text-slate-300');
+          chip.classList.add('bg-sky-600', 'text-white');
         } else {
-          chip.classList.remove('bg-slate-900', 'text-white');
-          chip.classList.add('bg-white', 'text-slate-600');
+          chip.classList.remove('bg-sky-600', 'text-white');
+          chip.classList.add('bg-slate-900', 'text-slate-300');
         }
       });
     }
